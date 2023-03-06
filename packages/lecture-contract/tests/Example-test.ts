@@ -27,7 +27,7 @@ describe('Counter', () => {
             )
         );
 
-        const deployer = await blockchain.treasury('deployer');
+        const deployer = await blockchain('deployer');
 
         const deployResult = await counter.sendDeploy(deployer.getSender(), toNano('0.05'));
 

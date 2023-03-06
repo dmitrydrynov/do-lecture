@@ -80,7 +80,7 @@ export class Lecture implements Contract {
         PAY: 0x0,
         REPORT: 0x15137b01,
         SOLVE: 0x52ae5647,
-        PAYBACK: 0x2bff4ddf,
+        CANCEL: 0x2bff4ddf,
         TRY_START: 0x4733f979,
         TRY_PAYOUT: 0x6ac5796b,
     };
@@ -94,7 +94,7 @@ export class Lecture implements Contract {
     static createFromConfig(config: LectureConfig, code: Cell, workchain = 0) {
         const data = lectureConfigToCell(config);
         const init = { code, data };
-        
+
         return new Lecture(contractAddress(workchain, init), init);
     }
 
@@ -115,7 +115,7 @@ export class Lecture implements Contract {
     }
 
     async sendCancel(provider: ContractProvider, via: Sender) {
-        const body = beginCell().storeUint(Lecture.OPERATION.PAYBACK, 32).endCell();
+        const body = beginCell().storeUint(Lecture.OPERATION.CANCEL, 32).endCell();
 
         await provider.internal(via, {
             value: toNano('0.1'),
@@ -124,11 +124,35 @@ export class Lecture implements Contract {
         });
     }
 
+    // if not funded payback money for senders, if funned - nothing
+    async sendTryStart(provider: ContractProvider, via: Sender, value: bigint) {
+        await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_START, 32).endCell());
+    }
+
+    // if no reports and reporting period has canceled 
+    async sendTryPayout(provider: ContractProvider, via: Sender, value: bigint) {
+        await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_PAYOUT, 32).endCell());
+    }
+
+    // user function, user isn't a sender or a teacher, can do after lecture start
     async sendReport(provider: ContractProvider, via: Sender, value: bigint) {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().storeUint(Lecture.OPERATION.REPORT, 32).endCell(),
+        });
+    }
+
+    // manager function, manager isn't a sender or a teacher, can do after lecture start and before destroy
+    async sendReportSolve(provider: ContractProvider, via: Sender, reportNo: number, satisfy: boolean) {
+        await provider.internal(via, {
+            value: toNano('0.1'),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+                .storeUint(Lecture.OPERATION.SOLVE, 32)
+                .storeUint(reportNo, 16)
+                .storeBit(satisfy)
+                .endCell(),
         });
     }
 

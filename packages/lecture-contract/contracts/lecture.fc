@@ -168,6 +168,8 @@ int total_payments() impure {
     }
 
     elseif (op == op::report()) {
+        throw_unless(708, ~ equal_slice_bits(sender_original, manager_address));
+        throw_unless(708, ~ equal_slice_bits(sender_original, lecturer_address));
         throw_unless(702, now() >= start_time);
         (slice val, int f?) = payments.udict_get?(16, sender);
         throw_unless(703, f?);
@@ -186,19 +188,27 @@ int total_payments() impure {
     elseif (op == op::solve()) {
         throw_unless(704, equal_slice_bits(sender_original, manager_address));
         throw_unless(705, now() >= start_time);
+
+        int report_no = in_msg_body~load_uint(16);
+        int approved? = in_msg_body~load_uint(1);
+
         (_, _, int f?) = reports.udict_get_max?(16);
         throw_unless(706, f?);
-        int report = in_msg_body~load_uint(16);
-        reports~udict_delete?(16, report);
-        ;; ;; ~dump([16, report]);
+
+        if(approved?) {
+            return_money();
+        } else {
+            reports~udict_delete?(16, report_no);
+            ;; ;; ~dump([16, report]);
+        }
 
         save_data();
         return ();
     }
 
-    elseif (op == op::payback()) {
+    elseif (op == op::cancel()) {
         ;; ~dump(0);
-        throw_unless(707, equal_slice_bits(sender_original, manager_address) | equal_slice_bits(sender_original, lecturer_address));
+        throw_unless(707, equal_slice_bits(sender_original, lecturer_address));
         ;; ~dump(1);
         return_money();
 
