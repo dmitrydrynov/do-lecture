@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "npm run build -- --watch",
     "build": "tsup",
-    "prebuild": "blueprint build"
+    "build:contract": "blueprint build"
   },
   "devDependencies": {
     "@ton-community/blueprint": "^0.4.1",

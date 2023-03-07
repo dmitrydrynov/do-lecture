@@ -85,6 +85,18 @@ int total_payments() impure {
     ;; ~dump(4);
 }
 
+() rollbackDeploy (slice sender_address) impure {
+    load_data();
+    send_raw_message(begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(sender_address)
+        .store_coins(0)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 32)
+        .store_slice("Deployment canceled")
+    .end_cell(), message_mode::all_not_reserved + message_mode::destroy_if_zero);
+    ;; ~dump(4);
+}
+
 () return_money () impure {
     load_data();
     (int key, slice val, int f?) = payments~udict::delete_get_min(16);
@@ -129,7 +141,14 @@ int total_payments() impure {
     }
     int init? = cs.slice_last(1).preload_uint(1);
     if (init? == 1) {
-        throw_unless(801, msg_value >= START_LESSON_PRICE);
+        if(msg_value < START_LESSON_PRICE) {
+            var flags = cs~load_uint(4);
+            (_, slice sender_original) = cs.load_msg_addr();
+
+            rollbackDeploy(sender_original);
+            throw(801);
+        }
+
         return ();
     }
 
@@ -152,6 +171,7 @@ int total_payments() impure {
     int op = in_msg_body~load_uint(32);
 
     if (op == op::pay()) {
+        throw_if(708, equal_slice_bits(sender_original, manager_address));
         throw_if(700, msg_value < MINIMUM_PAYMENT);
         throw_if(701, now() >= start_time);
         (int last_payment, _, int f?) = payments.udict_get_max?(16);
@@ -169,8 +189,8 @@ int total_payments() impure {
 
     elseif (op == op::report()) {
         throw_unless(708, ~ equal_slice_bits(sender_original, manager_address));
-        throw_unless(708, ~ equal_slice_bits(sender_original, lecturer_address));
-        throw_unless(702, now() >= start_time);
+        throw_unless(709, ~ equal_slice_bits(sender_original, lecturer_address));
+        throw_unless(702, now() > start_time);
         (slice val, int f?) = payments.udict_get?(16, sender);
         throw_unless(703, f?);
         (int last_report, _, int f?) = reports.udict_get_max?(16);
@@ -289,7 +309,7 @@ cell get_payments_by_user (slice address) method_id {
     (int key, slice val, int f?) = payments.udict_get_min?(16);
     while (f?) {
         slice v = val;
-        if(val~load_std_addr() == address~load_std_addr()) {
+        if(equal_slice_bits(val~load_msg_addr(), address)) {
             user_payments~udict_set(16, i, v);
             i = i + 1;
         }

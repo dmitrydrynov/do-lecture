@@ -129,15 +129,15 @@ export class Lecture implements Contract {
         await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_START, 32).endCell());
     }
 
-    // if no reports and reporting period has canceled 
+    // if no reports and reporting period has canceled
     async sendTryPayout(provider: ContractProvider, via: Sender, value: bigint) {
         await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_PAYOUT, 32).endCell());
     }
 
     // user function, user isn't a sender or a teacher, can do after lecture start
-    async sendReport(provider: ContractProvider, via: Sender, value: bigint) {
+    async sendReport(provider: ContractProvider, via: Sender) {
         await provider.internal(via, {
-            value,
+            value: toNano('0.1'),
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().storeUint(Lecture.OPERATION.REPORT, 32).endCell(),
         });
@@ -167,19 +167,32 @@ export class Lecture implements Contract {
     }
 
     async getPaymentsByUser(provider: ContractProvider, address: Address) {
-        const tupleBuilder = new TupleBuilder();
-        tupleBuilder.writeAddress(address);
-        const result = await provider.get('get_payments_by_user', tupleBuilder.build());
-        const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
+        try {
+            const tb = new TupleBuilder();
+            tb.writeAddress(address);
+            const result = await provider.get('get_payments_by_user', tb.build());
 
-        return payments;
+            if (result.stack.peek().type === 'int') return;
+
+            const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
+
+            return payments;
+        } catch (e) {
+            console.log(e);
+            return;
+        }
     }
 
     async getPayments(provider: ContractProvider) {
-        const result = await provider.get('get_payments', []);
-        const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
+        try {
+            const result = await provider.get('get_payments', []);
+            const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
 
-        return payments;
+            return payments;
+        } catch (e) {
+            console.log(e);
+            return;
+        }
     }
 
     async getReports(provider: ContractProvider) {
