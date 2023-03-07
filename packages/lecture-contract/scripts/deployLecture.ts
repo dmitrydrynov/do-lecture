@@ -9,7 +9,7 @@ export async function run(provider: NetworkProvider) {
                 startTime: Math.floor(Date.now() / 1000 + 60 * 60 * 4),
                 goal: toNano('1.5'),
                 lecturerAddress: Address.parse('EQB6LmhSEwtpVlX5RPU90t0DPoYgituWnFbOpi78VKcdrJAH'),
-                managerAddress: Address.parse('EQB6LmhSEwtpVlX5RPU90t0DPoYgituWnFbOpi78VKcdrJAH'),
+                managerAddress: Address.parse('EQAhqhwmezCswiYw-WRl1HzQccWINfVdS9WTTy9a20Ck58hE'),
             },
             await compile('Lecture')
         )
