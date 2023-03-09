@@ -1,0 +1,50 @@
+.countdownText {
+	background-color: #212a33;
+	padding: 8px 12px;
+	border-radius: 8px;
+}
+
+.countdownTime {
+	padding: 8px 12px;
+}
+
+.countdownTime {
+	position: relative;
+	margin-left: 16px;
+	width: 54px;
+	text-align: center;
+}
+
+.countdownTime::before {
+	position: absolute;
+	content: '';
+	width: 3px;
+	height: 3px;
+	border-radius: 50%;
+	color: var(--text-color);
+	background-color: currentColor;
+	box-shadow: 0 7px;
+	left: -3px;
+	top: 11px;
+	opacity: 0.5;
+}
+
+.countdownTime > span {
+	border-radius: 2px;
+	padding: 4px 8px;
+	background-color: #212a33;
+}
+
+.countdownTime > span:first-child {
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	margin-right: 1px;
+	padding-right: 4px;
+}
+
+.countdownTime > span:last-child {
+	margin-left: 1px;
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	padding-left: 4px;
+}

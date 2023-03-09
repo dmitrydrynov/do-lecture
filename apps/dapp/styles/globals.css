@@ -1,0 +1,14 @@
+@import '~antd/dist/reset.css';
+
+/* --btn-primary-color fff */
+/* --btn-primary-bg-color 36, 139, 218 */
+/* --footer-bg-color: #111417; */
+
+:root {
+	--main-bg-color: rgb(26, 32, 38);
+}
+
+html body {
+	color: #fff;
+	width: 100%;
+}

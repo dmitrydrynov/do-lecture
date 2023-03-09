@@ -1,0 +1,183 @@
+import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
+import { Base64 } from '@tonconnect/protocol'
+import TonConnect, { UserRejectsError, WalletInfo, WalletInfoInjected } from '@tonconnect/sdk'
+import { DateTime } from 'luxon'
+import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
+import { wrapper, code } from 'lecture-contract'
+import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
+
+type WithCallback = {
+	onSuccess?: () => void
+	onError?: () => void
+}
+
+type LectureDeployArgs = { config: LectureConfig }
+type LecturePayArgs = { address: Address; amount: number } & WithCallback
+type LectureCancelArgs = { address: Address } & WithCallback
+
+export class LectureContractConnector {
+	readonly connector: TonConnect
+	readonly validUntil: number = 30 // seconds
+
+	private constructor(connector: TonConnect, validUntil?: number) {
+		this.connector = connector
+
+		if (validUntil) this.validUntil = validUntil
+	}
+
+	private getConnectedWalletInfo = () => {
+		const conn: any = this.connector
+		const connectedWalletInfo = conn.provider.walletConnectionSource
+
+		return connectedWalletInfo as WalletInfo
+	}
+
+	private getProviderType = () => {
+		const conn: any = this.connector
+		const type = conn.provider.type
+
+		return type as string
+	}
+
+	private initLinkStrategy = () => {
+		const connectedWalletInfo = this.getConnectedWalletInfo()
+		if ('universalLink' in connectedWalletInfo && !(connectedWalletInfo as WalletInfoInjected).embedded && isMobile()) {
+			openLink(addReturnStrategy(connectedWalletInfo.universalLink, 'none'), '_blank')
+		}
+	}
+
+	private sendTransaction = async (messages: Record<any, any> | Array<Record<any, any>>) => {
+		if (this.getProviderType() === 'http') this.initLinkStrategy()
+
+		try {
+			const result = await this.connector.sendTransaction({
+				validUntil: DateTime.now().plus({ seconds: this.validUntil }).toUnixInteger(),
+				messages: Array.isArray(messages) ? messages : [messages],
+			})
+
+			return result
+		} catch (e: any) {
+			let message = 'Send transaction error'
+			let description = ''
+
+			if (typeof e === 'object' && e instanceof UserRejectsError) {
+				message = 'You rejected the transaction'
+				description = 'Please try again and confirm transaction in your wallet.'
+			}
+
+			return { error: message, description: description || e.message }
+		}
+	}
+
+	static init(connector: TonConnect) {
+		return new LectureContractConnector(connector)
+	}
+
+	cancel = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
+		try {
+			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.CANCEL, 32).endCell()
+			const message = {
+				address: address.toString(),
+				amount: toNano('0.1').toString(),
+				payload: Base64.encode(body.toBoc()),
+			}
+
+			const result: any = await this.sendTransaction(message)
+
+			if (result?.error) {
+				throw new Error(`${result?.error}. ${result?.description} `)
+			}
+
+			console.log('[cancel]', result)
+
+			onSuccess()
+
+			return result
+		} catch (e: any) {
+			console.error(e)
+
+			return { lectureAddress: null, error: e.message }
+		}
+	}
+
+	deploy = async (config: LectureConfig) => {
+		try {
+			const deployCost = wrapper.Lecture.START_LESSON_PRICE
+			const contract = wrapper.Lecture.createFromConfig(config, Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0])
+			const stateInitCell = beginCell()
+				.store(storeStateInit(contract.init as StateInit))
+				.endCell()
+
+			console.log('deployCost', deployCost, wrapper.Lecture.SERVICE_FEE_AMOUNT, wrapper.Lecture.MINIMUM_PAYMENT)
+
+			const message = {
+				address: contract.address.toString(),
+				amount: toNano(deployCost || '1').toString(),
+				stateInit: Base64.encode(stateInitCell.toBoc()),
+			}
+
+			const result: any = await this.sendTransaction(message)
+
+			if (result?.error) {
+				throw new Error(`${result?.error}. ${result?.description} `)
+			}
+
+			return { lectureAddress: contract.address.toString() }
+		} catch (e: any) {
+			console.error(e)
+
+			return { error: e.message }
+		}
+	}
+
+	pay = async ({ address, amount, onSuccess = () => {} }: LecturePayArgs) => {
+		try {
+			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.PAY, 32).endCell()
+			const message = {
+				address: address.toString(), //contract address
+				amount: toNano(amount.toString()).toString(),
+				payload: Base64.encode(body.toBoc()), // init data
+			}
+
+			const result: any = await this.sendTransaction(message)
+
+			if (result?.error) {
+				throw new Error(`${result?.error}. ${result?.description} `)
+			}
+
+			onSuccess()
+
+			console.log('[pay]', result)
+			return result
+		} catch (error: any) {
+			return { error: error.message }
+		}
+	}
+
+	sendReport = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
+		try {
+			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.REPORT, 32).endCell()
+			const message = {
+				address: address.toString(),
+				amount: toNano('0.1').toString(),
+				payload: Base64.encode(body.toBoc()),
+			}
+
+			const result: any = await this.sendTransaction(message)
+
+			if (result?.error) {
+				throw new Error(`${result?.error}. ${result?.description} `)
+			}
+
+			console.log('[report]', result)
+
+			onSuccess()
+
+			return result
+		} catch (e: any) {
+			console.error(e)
+
+			return { lectureAddress: null, error: e.message }
+		}
+	}
+}

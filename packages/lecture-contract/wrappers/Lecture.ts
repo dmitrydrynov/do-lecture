@@ -75,7 +75,32 @@ const ReportsDictValue: DictionaryValue<ReportsLibrary> = {
     },
 };
 
+enum LectureError {
+    PAY_NOT_ENOUGH = 700,
+    PAY_AFTER_START = 701,
+    REPORT_BEFORE_START = 702,
+    REPORT_NO_PAYMENTS = 703,
+    SOLVE_SENDER_ISNOT_MANAGER = 704,
+    SOLVE_BEFORE_START = 705,
+    SOLVE_NO_REPORTS = 706,
+    CANCEL_SENDER_ISNOT_LECTURER = 707,
+    PAY_SENDER_IS_MANAGER = 708,
+    REPORT_SENDER_IS_LECTURER = 709,
+    TRY_START_TOO_EARLY = 710,
+    TRY_PAYOUT_TOO_EARLY = 711,
+    TRY_PAYOUT_WITH_REPORTS = 712,
+    DESTROY_SENDER_ISNOT_CONTRACT = 713,
+    REPORT_SENDER_IS_MANAGER = 714,
+    DEPLOY_PRICE_LESS = 799,
+}
+
 export class Lecture implements Contract {
+    static MINIMUM_PAYMENT = 0.5;
+    static START_LESSON_PRICE = 1;
+    static SERVICE_FEE_AMOUNT = 5;
+    static END_FUNDING_PERIOD = 7200;
+    static END_REPORTING_PERIOD = 7200;
+
     static OPERATION = {
         PAY: 0x0,
         REPORT: 0x15137b01,
@@ -85,23 +110,30 @@ export class Lecture implements Contract {
         TRY_PAYOUT: 0x6ac5796b,
     };
 
-    static Error = {
-        PAY_NOT_ENOUGH: 700,
-        PAY_AFTER_START: 701,
-        REPORT_BEFORE_START: 702,
-        REPORT_NO_PAYMENTS: 703,
-        SOLVE_SENDER_ISNOT_MANAGER: 704,
-        SOLVE_BEFORE_START: 705,
-        SOLVE_NO_REPORTS: 706,
-        CANCEL_SENDER_ISNOT_LECTURER: 707,
-        PAY_SENDER_IS_MANAGER: 708,
-        REPORT_SENDER_IS_LECTURER: 709,
-        TRY_START_TOO_EARLY: 710,
-        TRY_PAYOUT_TOO_EARLY: 711,
-        TRY_PAYOUT_WITH_REPORTS: 712,
-        DESTROY_SENDER_ISNOT_CONTRACT: 713,
-        REPORT_SENDER_IS_MANAGER: 714,
-        DEPLOY_PRICE_LESS: 799,
+    private static exitCodesAsText: Record<number, string> = {
+        700: 'Error 700',
+        701: 'Error 701',
+        702: 'Error 702',
+        703: 'Error 703',
+        704: 'Error 704',
+        705: 'Error 705',
+        706: 'Error 706',
+        707: 'Error 707',
+        708: 'Error 708',
+        709: 'Error 709',
+        710: 'Error 710',
+        711: 'Error 711',
+        712: 'Error 712',
+        713: 'Error 713',
+        714: 'Error 714',
+        799:
+            'The lecture has not been created. The cost of publishing a new lecture is below the minimum (' +
+            Lecture.START_LESSON_PRICE +
+            ' TON)',
+    };
+
+    static errorAsText = (exitCode: LectureError) => {
+        return Lecture.exitCodesAsText[exitCode];
     };
 
     constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
