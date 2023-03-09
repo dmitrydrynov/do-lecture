@@ -188,7 +188,7 @@ int total_payments() impure {
     }
 
     elseif (op == op::report()) {
-        throw_unless(708, ~ equal_slice_bits(sender_original, manager_address));
+        throw_unless(714, ~ equal_slice_bits(sender_original, manager_address));
         throw_unless(709, ~ equal_slice_bits(sender_original, lecturer_address));
         throw_unless(702, now() > start_time);
         (slice val, int f?) = payments.udict_get?(16, sender);

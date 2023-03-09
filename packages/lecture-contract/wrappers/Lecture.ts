@@ -85,6 +85,25 @@ export class Lecture implements Contract {
         TRY_PAYOUT: 0x6ac5796b,
     };
 
+    static Error = {
+        PAY_NOT_ENOUGH: 700,
+        PAY_AFTER_START: 701,
+        REPORT_BEFORE_START: 702,
+        REPORT_NO_PAYMENTS: 703,
+        SOLVE_SENDER_ISNOT_MANAGER: 704,
+        SOLVE_BEFORE_START: 705,
+        SOLVE_NO_REPORTS: 706,
+        CANCEL_SENDER_ISNOT_LECTURER: 707,
+        PAY_SENDER_IS_MANAGER: 708,
+        REPORT_SENDER_IS_LECTURER: 709,
+        TRY_START_TOO_EARLY: 710,
+        TRY_PAYOUT_TOO_EARLY: 711,
+        TRY_PAYOUT_WITH_REPORTS: 712,
+        DESTROY_SENDER_ISNOT_CONTRACT: 713,
+        REPORT_SENDER_IS_MANAGER: 714,
+        DEPLOY_PRICE_LESS: 799,
+    };
+
     constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
 
     static createFromAddress(address: Address) {
@@ -125,13 +144,23 @@ export class Lecture implements Contract {
     }
 
     // if not funded payback money for senders, if funned - nothing
-    async sendTryStart(provider: ContractProvider, via: Sender, value: bigint) {
-        await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_START, 32).endCell());
+    async sendTryStart(provider: ContractProvider) {
+        try {
+            await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_START, 32).endCell());
+        } catch (e) {
+            console.log(e);
+            return;
+        }
     }
 
     // if no reports and reporting period has canceled
-    async sendTryPayout(provider: ContractProvider, via: Sender, value: bigint) {
-        await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_PAYOUT, 32).endCell());
+    async sendTryPayout(provider: ContractProvider) {
+        try {
+            await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_PAYOUT, 32).endCell());
+        } catch (e) {
+            console.log(e);
+            return;
+        }
     }
 
     // user function, user isn't a sender or a teacher, can do after lecture start
