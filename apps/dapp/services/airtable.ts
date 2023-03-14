@@ -116,3 +116,9 @@ export const getLecture = async (id: string) => {
 
 	return { id: lecture.id, ...lecture.fields }
 }
+
+export const getCommunity = async (id: string) => {
+	const community = await AirtableService('Community').find(id)
+
+	return { id: community.id, ...community.fields }
+}

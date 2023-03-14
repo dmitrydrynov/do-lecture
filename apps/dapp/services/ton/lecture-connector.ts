@@ -1,10 +1,12 @@
-import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
 import { Base64 } from '@tonconnect/protocol'
 import TonConnect, { UserRejectsError, WalletInfo, WalletInfoInjected } from '@tonconnect/sdk'
-import { DateTime } from 'luxon'
-import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
 import { wrapper, code } from 'lecture-contract'
 import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
+import { DateTime } from 'luxon'
+import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
+import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
+
+const { Lecture: LectureContract } = wrapper
 
 type WithCallback = {
 	onSuccess?: () => void
@@ -46,7 +48,7 @@ export class LectureContractConnector {
 		}
 	}
 
-	private sendTransaction = async (messages: Record<any, any> | Array<Record<any, any>>) => {
+	private send = async (messages: Record<any, any> | Array<Record<any, any>>) => {
 		if (this.getProviderType() === 'http') this.initLinkStrategy()
 
 		try {
@@ -75,14 +77,13 @@ export class LectureContractConnector {
 
 	cancel = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
 		try {
-			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.CANCEL, 32).endCell()
-			const message = {
+			const body = beginCell().storeUint(LectureContract.OPERATION.CANCEL, 32).endCell()
+
+			const result: any = await this.send({
 				address: address.toString(),
 				amount: toNano('0.1').toString(),
 				payload: Base64.encode(body.toBoc()),
-			}
-
-			const result: any = await this.sendTransaction(message)
+			})
 
 			if (result?.error) {
 				throw new Error(`${result?.error}. ${result?.description} `)
@@ -102,27 +103,24 @@ export class LectureContractConnector {
 
 	deploy = async (config: LectureConfig) => {
 		try {
-			const deployCost = wrapper.Lecture.START_LESSON_PRICE
-			const contract = wrapper.Lecture.createFromConfig(config, Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0])
+			const deployPrice = LectureContract.START_LESSON_PRICE || '1'
+			const initCode = Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0]
+			const lecture = LectureContract.createFromConfig(config, initCode)
 			const stateInitCell = beginCell()
-				.store(storeStateInit(contract.init as StateInit))
+				.store(storeStateInit(lecture.init as StateInit))
 				.endCell()
 
-			console.log('deployCost', deployCost, wrapper.Lecture.SERVICE_FEE_AMOUNT, wrapper.Lecture.MINIMUM_PAYMENT)
-
-			const message = {
-				address: contract.address.toString(),
-				amount: toNano(deployCost || '1').toString(),
+			const result: any = await this.send({
+				address: lecture.address.toString(),
+				amount: toNano(deployPrice).toString(),
 				stateInit: Base64.encode(stateInitCell.toBoc()),
-			}
-
-			const result: any = await this.sendTransaction(message)
+			})
 
 			if (result?.error) {
 				throw new Error(`${result?.error}. ${result?.description} `)
 			}
 
-			return { lectureAddress: contract.address.toString() }
+			return { lectureAddress: lecture.address.toString() }
 		} catch (e: any) {
 			console.error(e)
 
@@ -132,14 +130,13 @@ export class LectureContractConnector {
 
 	pay = async ({ address, amount, onSuccess = () => {} }: LecturePayArgs) => {
 		try {
-			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.PAY, 32).endCell()
-			const message = {
+			const body = beginCell().storeUint(LectureContract.OPERATION.PAY, 32).endCell()
+
+			const result: any = await this.send({
 				address: address.toString(), //contract address
 				amount: toNano(amount.toString()).toString(),
 				payload: Base64.encode(body.toBoc()), // init data
-			}
-
-			const result: any = await this.sendTransaction(message)
+			})
 
 			if (result?.error) {
 				throw new Error(`${result?.error}. ${result?.description} `)
@@ -156,14 +153,13 @@ export class LectureContractConnector {
 
 	sendReport = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
 		try {
-			const body = beginCell().storeUint(wrapper.Lecture.OPERATION.REPORT, 32).endCell()
-			const message = {
+			const body = beginCell().storeUint(LectureContract.OPERATION.REPORT, 32).endCell()
+
+			const result: any = await this.send({
 				address: address.toString(),
 				amount: toNano('0.1').toString(),
 				payload: Base64.encode(body.toBoc()),
-			}
-
-			const result: any = await this.sendTransaction(message)
+			})
 
 			if (result?.error) {
 				throw new Error(`${result?.error}. ${result?.description} `)

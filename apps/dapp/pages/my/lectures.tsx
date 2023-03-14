@@ -1,30 +1,22 @@
 import { ReactNode, useContext, useState } from 'react'
-import PublicLayout from '@/components/layouts/PublicLayout'
-import { MyLectures } from '@/components/MyLectures'
-import { TonContext } from '@/contexts/ton-context'
-import { fetcher } from '@/helpers/fetcher'
-import styles from '@/styles/Home.module.css'
 import { Button, Space } from 'antd'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import useSWR from 'swr'
+import PublicLayout from '@/components/layouts/PublicLayout'
+import { MyLectures } from '@/components/MyLectures'
+import { TonContext } from '@/contexts/ton-context'
+import styles from '@/styles/Home.module.css'
 
 const AddLectureModal = dynamic(() => import('@/components/modals/AddLectureModal').then((r) => r.AddLectureModal), { ssr: false })
 
 const MyLecturesPage = ({ user }: any) => {
-	const { connector, userWallet } = useContext(TonContext)
+	const { connector } = useContext(TonContext)
 	const [addLectureModalOpen, setAddLectureModalOpen] = useState(false)
-	const {
-		data: lectures,
-		mutate: refetchLectures,
-		isLoading: lecturesLoading,
-	} = useSWR(connector?.connected ? ['/api/my/lectures'] : null, fetcher, {
-		refreshInterval: 10000,
-	})
+	const [lectureAdded, setLectureAdded] = useState(false)
 
 	const handleAddLecture = () => {
 		setAddLectureModalOpen(false)
-		refetchLectures()
+		setLectureAdded(true)
 	}
 
 	return (
@@ -40,7 +32,7 @@ const MyLecturesPage = ({ user }: any) => {
 					{connector?.connected && (
 						<>
 							<Button onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button>
-							<MyLectures isLoading={lecturesLoading} data={lectures} wallet={userWallet} onChange={() => refetchLectures()} />
+							<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
 						</>
 					)}
 				</Space>

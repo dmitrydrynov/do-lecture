@@ -1,3 +1,4 @@
+import { sleep } from '@ton-community/blueprint';
 import { TonClient } from 'ton';
 import {
     Address,
@@ -16,6 +17,7 @@ import {
 
 export type LectureConfig = {
     startTime: number;
+    serviceAddress: Address;
     managerAddress: Address;
     lecturerAddress: Address;
     goal: bigint;
@@ -38,6 +40,7 @@ export interface ReportsLibrary {
 export function lectureConfigToCell(config: LectureConfig): Cell {
     return beginCell()
         .storeUint(config.startTime, 32)
+        .storeAddress(config.serviceAddress)
         .storeAddress(config.managerAddress)
         .storeAddress(config.lecturerAddress)
         .storeUint(config.goal, 64)
@@ -91,6 +94,7 @@ enum LectureError {
     TRY_PAYOUT_WITH_REPORTS = 712,
     DESTROY_SENDER_ISNOT_CONTRACT = 713,
     REPORT_SENDER_IS_MANAGER = 714,
+    REPORT_SENDER_IS_SERVICE = 715,
     DEPLOY_PRICE_LESS = 799,
 }
 
@@ -126,6 +130,7 @@ export class Lecture implements Contract {
         712: 'Error 712',
         713: 'Error 713',
         714: 'Error 714',
+        715: 'Error 715',
         799:
             'The lecture has not been created. The cost of publishing a new lecture is below the minimum (' +
             Lecture.START_LESSON_PRICE +
@@ -280,6 +285,7 @@ export class Lecture implements Contract {
                 startTime: tuple.readNumber(),
                 goal: tuple.readNumber(),
                 left: tuple.readNumber(),
+                serviceAddress: tuple.readCell().beginParse().loadAddress(),
                 managerAddress: tuple.readCell().beginParse().loadAddress(),
                 lecturerAddress: tuple.readCell().beginParse().loadAddress(),
                 paymentCount: tuple.readNumber(),
@@ -294,4 +300,16 @@ export class Lecture implements Contract {
             return;
         }
     }
+
+    // waitForDeploy = (address: Address) => {
+    //     for (let i = 0; i < 60; i++) {
+    //         // isContractDeployed
+
+    //         // if(true) return deployed
+
+    //         sleep(2000);
+    //     }
+
+    //     // return not deployed
+    // };
 }

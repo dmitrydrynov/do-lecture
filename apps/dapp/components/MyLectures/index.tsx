@@ -1,20 +1,34 @@
-import { useContext, useState } from 'react'
-import { TonContext } from '@/contexts/ton-context'
-import { LectureContractConnector } from '@/services/ton/lecture-connector'
-import { fetcher } from '@/helpers/fetcher'
-import { renderPrice } from '@/helpers/utils'
+import { useContext, useEffect, useState } from 'react'
 import { HeartTwoTone } from '@ant-design/icons'
 import Icon from '@ant-design/icons'
 import { Button, InputNumber, List, message, Progress, Space, Typography } from 'antd'
 import { DateTime } from 'luxon'
+import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address } from 'ton'
 import { TonScanSvg } from '../icons/TonScanSvg'
+import { TonContext } from '@/contexts/ton-context'
+import { fetcher } from '@/helpers/fetcher'
+import { renderPrice } from '@/helpers/utils'
+import { LectureContractConnector } from '@/services/ton/lecture-connector'
 
-export const MyLectures = ({ data, wallet, onChange, isLoading }: any) => {
-	const { connector, network } = useContext(TonContext)
+export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
+	const { connector, network, userWallet } = useContext(TonContext)
 	const [amount, setAmount] = useState<number>(0.01)
 	const { trigger: cancelLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/cancel', (url, { arg }) => fetcher([url, arg]))
+	const {
+		data,
+		mutate: refetchLectures,
+		isLoading,
+	} = useSWR(connector?.connected ? ['/api/my/lectures'] : null, fetcher, {
+		refreshInterval: 10000,
+	})
+
+	useEffect(() => {
+		if (forceUpdate) {
+			refetchLectures().then(() => onUpdate())
+		}
+	}, [forceUpdate])
 
 	const calculateProgress = (lecture: any) => {
 		if (!lecture.meta) return 0
@@ -34,7 +48,6 @@ export const MyLectures = ({ data, wallet, onChange, isLoading }: any) => {
 				amount,
 				onSuccess: () => {
 					message.success('Вы внесли оплату для лекции')
-					onChange()
 				},
 			})
 
@@ -48,7 +61,7 @@ export const MyLectures = ({ data, wallet, onChange, isLoading }: any) => {
 	}
 
 	const handleCancelLecture = async (lecture: any) => {
-		if (!wallet || !connector) return
+		if (!userWallet || !connector) return
 
 		try {
 			const res = await cancelLecture({ id: lecture.id })
@@ -68,7 +81,7 @@ export const MyLectures = ({ data, wallet, onChange, isLoading }: any) => {
 	}
 
 	const handleAddReport = async (lecture: any) => {
-		if (!wallet || !connector) return
+		if (!userWallet || !connector) return
 
 		try {
 			const lc = LectureContractConnector.init(connector)

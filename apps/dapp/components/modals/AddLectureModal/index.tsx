@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from 'react'
-import { TonContext } from '@/contexts/ton-context'
-import { LectureContractConnector } from '@/services/ton/lecture-connector'
-import { fetcher } from '@/helpers/fetcher'
 import { Alert, Col, DatePicker, Form, Input, InputNumber, message, Modal, Row, Spin, TimePicker } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import dayjs, { Dayjs } from 'dayjs'
+import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address } from 'ton'
-import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
+import { TonContext } from '@/contexts/ton-context'
+import { fetcher } from '@/helpers/fetcher'
+import { LectureContractConnector } from '@/services/ton/lecture-connector'
 
 interface AddLectureModalParams {
 	open: boolean
@@ -23,6 +23,7 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 	const [creating, setCreating] = useState(false)
 	const [messageApi, contextHolder] = message.useMessage()
 	const { data: rate } = useSWR(['/api/rates', { coins: formData?.price || 10 }], fetcher)
+	const { data: community } = useSWR(['/api/community', {}], fetcher)
 	const { trigger: addLecture, isMutating: newLectureAdding }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/add', (url, { arg }: any) => fetcher([url, arg]))
 
 	useEffect(() => {
@@ -49,7 +50,7 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 			const startTime = data.date.set('hour', data.time.hour()).set('minute', data.time.minute()).set('second', 0)
 			const config: LectureConfig = {
 				startTime: startTime.unix(),
-				managerAddress: Address.parse('kQB6LmhSEwtpVlX5RPU90t0DPoYgituWnFbOpi78VKcdrCuN'),
+				managerAddress: Address.parse(community.managerAddress),
 				lecturerAddress: Address.parse(userWallet.account.address),
 				goal: data.price || 0,
 			}
