@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 import { getPaidLecturesByLecturer } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton'
+import dayjs from 'dayjs'
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
@@ -23,6 +24,8 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 
 					const meta = await contract.getData()
 					// const stage = await contract.getStage()
+
+					console.log('version', await contract.getVersion())
 
 					response.push({
 						...l,

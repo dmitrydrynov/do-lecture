@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import { fetcher } from '@/helpers/fetcher'
 
 export type SettingsContextType = {
-	serviceAddress?: string
+	serviceWallet?: string
 }
 
 export const SettingsContext = createContext<SettingsContextType>({})

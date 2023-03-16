@@ -18,6 +18,7 @@ global slice lecturer_address; ;; MsgAddressInt
 global cell payments; ;; Maybe (Hashmap 16 uint64)
 global cell reports; ;; Maybe (Hashmap 16 MsgAddressInt)
 
+const int version = 1;
 const int MINIMUM_PAYMENT = 500000000; ;; minimal payment 1 ton = 1000000000
 const int START_LESSON_PRICE = 1000000000; ;; minimal payment 1 ton = 1000000000
 const int SERVICE_FEE_AMOUNT = 5; ;; percents
@@ -283,7 +284,7 @@ int total_payments() impure {
 
 ;; get-methods
 
-(int, int, int, slice, slice, int, int) get_all_data () method_id {
+(int, int, int, slice, slice, slice, int, int) get_all_data () method_id {
     load_data();
 
     (int key, slice val, int f?) = reports.udict_get_min?(16);
@@ -300,7 +301,7 @@ int total_payments() impure {
         (key, val, f?) = payments.udict_get_next?(16, key);
     }
 
-    return (start_time, goal, left, manager_address, lecturer_address, payments_count, reports_count);
+    return (start_time, goal, left, service_address, manager_address, lecturer_address, payments_count, reports_count);
 }
 
 (int, int) get_left_goal () method_id {
@@ -344,4 +345,8 @@ cell get_reports () method_id {
     load_data();
 
     return begin_cell().store_dict(reports).end_cell();
+}
+
+int get_version () method_id {
+    return version;
 }

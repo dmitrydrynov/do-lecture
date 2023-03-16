@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useContext, useEffect, useState } from 'react'
-import { TonContext } from '@/contexts/ton-context'
-import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
-import { useSlicedAddress } from '@/hooks/useSlicedAddress'
 import { DownOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Modal, Row, Space, Typography } from 'antd'
 import { QRCode } from 'react-qrcode-logo'
 import styles from './style.module.css'
+import { TonContext } from '@/contexts/ton-context'
+import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
+import { useSlicedAddress } from '@/hooks/useSlicedAddress'
 
 const { Text, Paragraph } = Typography
 

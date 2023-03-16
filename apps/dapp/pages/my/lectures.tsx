@@ -28,17 +28,17 @@ const MyLecturesPage = ({ user }: any) => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<main className={styles.main}>
-				<Space direction="vertical" style={{ width: '100%' }}>
-					{connector?.connected && (
-						<>
+				{connector?.connected && (
+					<>
+						<Space direction="vertical" style={{ width: '100%' }}>
 							<Button onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button>
 							<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
-						</>
-					)}
-				</Space>
-			</main>
+						</Space>
 
-			<AddLectureModal open={addLectureModalOpen} onFinish={handleAddLecture} onCancel={() => setAddLectureModalOpen(false)} />
+						<AddLectureModal open={addLectureModalOpen} onFinish={handleAddLecture} onCancel={() => setAddLectureModalOpen(false)} />
+					</>
+				)}
+			</main>
 		</>
 	)
 }

@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from 'react'
 import { Alert, Col, DatePicker, Form, Input, InputNumber, message, Modal, Row, Spin, TimePicker } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import dayjs, { Dayjs } from 'dayjs'
-import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
-import { Address } from 'ton'
+import { Address } from 'ton-core'
+import { SettingsContext } from '@/contexts/settings'
 import { TonContext } from '@/contexts/ton-context'
 import { fetcher } from '@/helpers/fetcher'
 import { LectureContractConnector } from '@/services/ton/lecture-connector'
@@ -18,7 +18,8 @@ interface AddLectureModalParams {
 
 export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalParams) => {
 	const [form] = useForm()
-	const { connector, userWallet } = useContext(TonContext)
+	const { connector, userWallet, network } = useContext(TonContext)
+	const settings = useContext(SettingsContext)
 	const [formData, setFormData] = useState<any>()
 	const [creating, setCreating] = useState(false)
 	const [messageApi, contextHolder] = message.useMessage()
@@ -34,12 +35,13 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 	}, [open])
 
 	const handleAddPaidLecture = async () => {
-		if (!userWallet || !connector) return
+		if (!settings?.serviceWallet || !userWallet || !connector?.connected) return
 
 		const data = await form.validateFields()
 
 		try {
 			setCreating(true)
+
 			messageApi.open({
 				type: 'loading',
 				content: 'Waiting...',
@@ -48,15 +50,14 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 			})
 
 			const startTime = data.date.set('hour', data.time.hour()).set('minute', data.time.minute()).set('second', 0)
-			const config: LectureConfig = {
+			const lectureConnector = LectureContractConnector.init(connector)
+			const result = await lectureConnector.deploy({
 				startTime: startTime.unix(),
+				goal: data.price || 0,
+				serviceAddress: Address.parse(settings.serviceWallet),
 				managerAddress: Address.parse(community.managerAddress),
 				lecturerAddress: Address.parse(userWallet.account.address),
-				goal: data.price || 0,
-			}
-
-			const lc = LectureContractConnector.init(connector)
-			const result = await lc.deploy(config)
+			})
 
 			if (result.hasOwnProperty('error')) {
 				throw new Error(result.error)

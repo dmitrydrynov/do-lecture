@@ -1,5 +1,3 @@
-import { sleep } from '@ton-community/blueprint';
-import { TonClient } from 'ton';
 import {
     Address,
     beginCell,
@@ -149,9 +147,9 @@ export class Lecture implements Contract {
 
     static createFromConfig(config: LectureConfig, code: Cell, workchain = 0) {
         const data = lectureConfigToCell(config);
-        const init = { code, data };
+        const stateInit = { code, data };
 
-        return new Lecture(contractAddress(workchain, init), init);
+        return new Lecture(contractAddress(workchain, stateInit), stateInit);
     }
 
     async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
@@ -280,12 +278,14 @@ export class Lecture implements Contract {
             const result = await provider.get('get_all_data', []);
             const tuple = result.stack;
 
+            
+
             data = {
                 ...data,
                 startTime: tuple.readNumber(),
                 goal: tuple.readNumber(),
                 left: tuple.readNumber(),
-                serviceAddress: tuple.readCell().beginParse().loadAddress(),
+                // serviceAddress: tuple.readCell().beginParse().loadAddress(),
                 managerAddress: tuple.readCell().beginParse().loadAddress(),
                 lecturerAddress: tuple.readCell().beginParse().loadAddress(),
                 paymentCount: tuple.readNumber(),
@@ -300,16 +300,11 @@ export class Lecture implements Contract {
             return;
         }
     }
+    
+    async getVersion(provider: ContractProvider) {
+        const result = await provider.get('get_version', []);
+        const version = result.stack.readNumber()
 
-    // waitForDeploy = (address: Address) => {
-    //     for (let i = 0; i < 60; i++) {
-    //         // isContractDeployed
-
-    //         // if(true) return deployed
-
-    //         sleep(2000);
-    //     }
-
-    //     // return not deployed
-    // };
+        return version;
+    }
 }

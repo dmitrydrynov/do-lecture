@@ -1,4 +1,6 @@
 import Airtable from 'airtable'
+import { Attachment } from 'airtable/lib/attachment'
+import { Collaborator } from 'airtable/lib/collaborator'
 import dayjs from 'dayjs'
 
 const AirtableService = new Airtable({
@@ -121,4 +123,18 @@ export const getCommunity = async (id: string) => {
 	const community = await AirtableService('Community').find(id)
 
 	return { id: community.id, ...community.fields }
+}
+
+export const getSettings = async () => {
+	const settings = await AirtableService('Settings').select().all()
+	let response: Record<string, string> = {}
+
+	settings.map((setting) => {
+		const name = setting.get('Name') as string
+		const value = setting.get('Value') as string
+
+		response[name] = value
+	})
+
+	return Object.entries(response).length > 0 ? response : null
 }

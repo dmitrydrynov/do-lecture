@@ -1081,10 +1081,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@ton-community/blueprint@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@ton-community/blueprint/-/blueprint-0.4.1.tgz#f837761b983300214d684ecd5f42bd3bab43298b"
-  integrity sha512-RCg93eFYY21+Pqz19w6MnxJI5FewGe6EA7TYl8rU24eezCZuaoBa3biPpkViDMwORWCm5qGnF7b4gAIpTFRtPA==
+"@ton-community/blueprint@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@ton-community/blueprint/-/blueprint-0.5.0.tgz#db421d3f85b7c31cdac58760270b92bee67f0561"
+  integrity sha512-1tM7qGOvNqzf+ILhivKs4KgIszSMrPZSwgprNuirCpST4itZR2NAo5ushzI7+j7P6VNur/6u5Ij+itg662Z/fQ==
   dependencies:
     "@orbs-network/ton-access" "^2.2.2"
     "@ton-community/func-js" "^0.4.0"
@@ -1110,15 +1110,15 @@
     "@ton-community/func-js-bin" "0.4.1"
     arg "^5.0.2"
 
-"@ton-community/sandbox@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@ton-community/sandbox/-/sandbox-0.5.1.tgz#bfd731ff3e21a2eb207b21f20d1a8261a758734d"
-  integrity sha512-l5Ac0kn7uUSLxQAOzvnP+7gfnGv6vFtp45/j8LWv5pCgQ7cRqAAq1LX0xXSgL0E0ksmXrUxKHcgonIgSI3wCSA==
+"@ton-community/sandbox@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@ton-community/sandbox/-/sandbox-0.6.1.tgz#a60b4aa53ab4200b7eb1bf7760dbd8886ba5cda8"
+  integrity sha512-q9SMSAm0UZkYWQG2SZs3XhI+h1ma3w865P0R6+BG3ZiEkbv2cdjURN3IAdOnlAo1QXbd9UD0rLspXZlpqZHuRw==
 
-"@ton-community/test-utils@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@ton-community/test-utils/-/test-utils-0.0.2.tgz#ee0ef19738f329c5111b730e40f8d6432f71f6be"
-  integrity sha512-cQikP/6nvgH7UhFMqncCY9Xrxup1iEoqzZ6u91Ji3c4Y3Yy4NAeH93FAZtM/E2QRSFM4nrNTWzHQzvbs2ntBsA==
+"@ton-community/test-utils@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@ton-community/test-utils/-/test-utils-0.1.0.tgz#a8dbfa70c1e93698fecc5a309783c4a1780e51b2"
+  integrity sha512-5+p/wVzWRgOsMPMn6WRbEAp4t2q6X5vI1Oc3fBUUWN+vbspGQ2EJhvlBofsMw7qwPHxn2AxaDbiVT/pT9GhEwQ==
   dependencies:
     node-inspect-extracted "^2.0.0"
 
@@ -5878,13 +5878,6 @@ toggle-selection@^1.0.6:
   resolved "https://registry.yarnpkg.com/toggle-selection/-/toggle-selection-1.0.6.tgz#6e45b1263f2017fa0acc7d89d78b15b8bf77da32"
   integrity sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==
 
-ton-core@^0.47.1:
-  version "0.47.1"
-  resolved "https://registry.yarnpkg.com/ton-core/-/ton-core-0.47.1.tgz#22298d79e345ea1a34825b4044dda5a7c5995474"
-  integrity sha512-XxcgLYH+Ngo3uh7O7jkzA0/O8nfG3WC3fgUmdvY9/IkGKpkO3Y/KHtrZgAOHYAkxJCmaXpi4aPf4JEnZEiPrWQ==
-  dependencies:
-    symbol.inspect "1.0.1"
-
 ton-core@^0.48.0:
   version "0.48.0"
   resolved "https://registry.yarnpkg.com/ton-core/-/ton-core-0.48.0.tgz#df744c9b13b3193cb7eb8a9cbb715bcf0437e467"
@@ -5948,7 +5941,7 @@ ton@9.8.0:
     ton-crypto "2.1.0"
     tweetnacl "1.0.3"
 
-ton@^13.3.0, ton@^13.4.1:
+ton@^13.4.1:
   version "13.4.1"
   resolved "https://registry.yarnpkg.com/ton/-/ton-13.4.1.tgz#8808370785498a8762848d4cdd8a781964df6a74"
   integrity sha512-VCHmGE8o1EJBp5JdKNiqjHW5hmUqSfSYYIsMfCje8/GA6sLzhhtMmznuGsrAQhM+MeEAUSt72SeI41z/wnu9MQ==

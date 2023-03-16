@@ -26,10 +26,6 @@ export const useTonContext = ({ onConnectError }: any) => {
 	const [user, setUser] = useState()
 
 	useEffect(() => {
-		console.log('state', { connector, availableWallets, userWallet, network })
-	}, [connector, availableWallets, userWallet, network])
-
-	useEffect(() => {
 		const connector = new TonConnect({
 			manifestUrl: process.env.NEXT_PUBLIC_APP_URL + '/tonconnect-manifest.json',
 		})
@@ -62,25 +58,32 @@ export const useTonContext = ({ onConnectError }: any) => {
 	}
 
 	const handleStatusChange = async (wallet?: any) => {
-		console.log('handleStatusChange', wallet)
+if(user) return
+
 
 		if (!wallet) {
 			setUserWallet(undefined)
 			return
 		}
 
+		console.log('handleStatusChange', wallet)
+
 		const walletAdress = Address.parseRaw(wallet.account.address).toString()
-		const walletAddressHash: Buffer = await sha256(walletAdress)
 
-		const reponse = await fetch('/api/auth/login', {
-			method: 'post',
-			body: JSON.stringify({ hash: walletAddressHash.toString('hex') }),
-		})
+		if (!user) {
+			const walletAddressHash: Buffer = await sha256(walletAdress)
 
-		const userData = await reponse.json()
-		console.log('userData', userData)
+			const reponse = await fetch('/api/auth/login', {
+				method: 'post',
+				body: JSON.stringify({ hash: walletAddressHash.toString('hex') }),
+			})
 
-		setUser(userData)
+			const userData = await reponse.json()
+			console.log('userData', userData)
+
+			setUser(userData)
+		}
+
 		setUserWallet(wallet)
 		setNetwork(networkName[wallet.account.chain])
 

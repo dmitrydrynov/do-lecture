@@ -11,6 +11,7 @@ import { TonContext } from '@/contexts/ton-context'
 import { fetcher } from '@/helpers/fetcher'
 import { renderPrice } from '@/helpers/utils'
 import { LectureContractConnector } from '@/services/ton/lecture-connector'
+import dayjs from 'dayjs'
 
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
 	const { connector, network, userWallet } = useContext(TonContext)
@@ -108,7 +109,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 					<List.Item
 						key={key}
 						actions={[
-							!!lecture.meta && <div key={0}>{DateTime.fromISO(lecture.meta.startTime).toFormat('yyyy LLL dd, hh:mm')}</div>,
+							!!lecture.meta && <div key={0}>{dayjs(lecture.meta.startTime * 1000).toString()}</div>,
 							<span key="paid">{lecture.meta?.paymentCount}</span>,
 							<span key="reports">{lecture.meta?.reportsCount}</span>,
 							<InputNumber

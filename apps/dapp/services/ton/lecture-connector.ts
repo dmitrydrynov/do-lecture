@@ -1,7 +1,6 @@
 import { Base64 } from '@tonconnect/protocol'
 import TonConnect, { UserRejectsError, WalletInfo, WalletInfoInjected } from '@tonconnect/sdk'
 import { wrapper, code } from 'lecture-contract'
-import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
 import { DateTime } from 'luxon'
 import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
 import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
@@ -13,7 +12,6 @@ type WithCallback = {
 	onError?: () => void
 }
 
-type LectureDeployArgs = { config: LectureConfig }
 type LecturePayArgs = { address: Address; amount: number } & WithCallback
 type LectureCancelArgs = { address: Address } & WithCallback
 
@@ -101,11 +99,11 @@ export class LectureContractConnector {
 		}
 	}
 
-	deploy = async (config: LectureConfig) => {
+	deploy = async (config: any, workchain?: number) => {
 		try {
 			const deployPrice = LectureContract.START_LESSON_PRICE || '1'
 			const initCode = Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0]
-			const lecture = LectureContract.createFromConfig(config, initCode)
+			const lecture = LectureContract.createFromConfig(config, initCode, workchain)
 			const stateInitCell = beginCell()
 				.store(storeStateInit(lecture.init as StateInit))
 				.endCell()

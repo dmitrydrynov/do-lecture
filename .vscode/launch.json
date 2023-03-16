@@ -17,8 +17,8 @@
       "name": "Next.js: debug full stack",
       "type": "node-terminal",
       "request": "launch",
-      "command": "yarn dev",
-      "console": "integratedTerminal",
+      "command": "yarn workspace dapp dev",
+      "localRoot": "${workspaceFolder}/apps/dapp",
       "serverReadyAction": {
         "pattern": "started server on .+, url: (https?://.+)",
         "uriFormat": "%s",
@@ -32,7 +32,6 @@
       "port": 9229,
       "address": "127.0.0.1",
       "localRoot": "${workspaceFolder}",
-      "protocol": "inspector"
     },
   ]
 }
