@@ -4,6 +4,7 @@ import { wrapper, code } from 'lecture-contract'
 import { DateTime } from 'luxon'
 import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
 import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
+import { waitForDeploy } from '.'
 
 const { Lecture: LectureContract } = wrapper
 
@@ -117,6 +118,8 @@ export class LectureContractConnector {
 			if (result?.error) {
 				throw new Error(`${result?.error}. ${result?.description} `)
 			}
+
+			await waitForDeploy(lecture.address)
 
 			return { lectureAddress: lecture.address.toString() }
 		} catch (e: any) {

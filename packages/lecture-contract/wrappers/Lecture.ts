@@ -285,7 +285,7 @@ export class Lecture implements Contract {
                 startTime: tuple.readNumber(),
                 goal: tuple.readNumber(),
                 left: tuple.readNumber(),
-                // serviceAddress: tuple.readCell().beginParse().loadAddress(),
+                serviceAddress: tuple.readCell().beginParse().loadAddress(),
                 managerAddress: tuple.readCell().beginParse().loadAddress(),
                 lecturerAddress: tuple.readCell().beginParse().loadAddress(),
                 paymentCount: tuple.readNumber(),
