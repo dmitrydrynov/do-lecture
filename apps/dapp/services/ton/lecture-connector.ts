@@ -1,12 +1,10 @@
-import { Base64 } from '@tonconnect/protocol'
 import TonConnect, { UserRejectsError, WalletInfo, WalletInfoInjected } from '@tonconnect/sdk'
 import { wrapper, code } from 'lecture-contract'
-import { DateTime } from 'luxon'
-import { Address, Cell, StateInit, beginCell, storeStateInit, toNano } from 'ton'
+import { Address, Cell, toNano, SenderArguments, Sender, OpenedContract } from 'ton'
 import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
-import { waitForDeploy } from '.'
+import { sleep, TonNetworkProvider } from './provider'
 
-const { Lecture: LectureContract } = wrapper
+const { Lecture } = wrapper
 
 type WithCallback = {
 	onSuccess?: () => void
@@ -16,25 +14,37 @@ type WithCallback = {
 type LecturePayArgs = { address: Address; amount: number } & WithCallback
 type LectureCancelArgs = { address: Address } & WithCallback
 
-export class LectureContractConnector {
-	readonly connector: TonConnect
-	readonly validUntil: number = 30 // seconds
+export class LectureConnector {
+	private provider: TonNetworkProvider
+	private lectureContract?: OpenedContract<wrapper.Lecture>
+	private sender?: Sender
+	private validUntil: number = 30 // seconds
 
-	private constructor(connector: TonConnect, validUntil?: number) {
-		this.connector = connector
+	private constructor(connector: TonConnect, lectureAddress: Address, validUntil?: number) {
+		this.provider = new TonNetworkProvider(connector)
+		this.sender = this.provider.sender()
+		this.initLecture(lectureAddress)
 
 		if (validUntil) this.validUntil = validUntil
 	}
 
+	static async init(connector: TonConnect, lectureAddress: Address) {
+		return new LectureConnector(connector, lectureAddress)
+	}
+
+	async initLecture(lectureAddress: Address) {
+		this.lectureContract = await this.provider.open(Lecture.createFromAddress(lectureAddress))
+	}
+
 	private getConnectedWalletInfo = () => {
-		const conn: any = this.connector
+		const conn: any = this.provider.connector
 		const connectedWalletInfo = conn.provider.walletConnectionSource
 
 		return connectedWalletInfo as WalletInfo
 	}
 
 	private getProviderType = () => {
-		const conn: any = this.connector
+		const conn: any = this.provider.connector
 		const type = conn.provider.type
 
 		return type as string
@@ -47,14 +57,11 @@ export class LectureContractConnector {
 		}
 	}
 
-	private send = async (messages: Record<any, any> | Array<Record<any, any>>) => {
+	private send = async (args: SenderArguments) => {
 		if (this.getProviderType() === 'http') this.initLinkStrategy()
 
 		try {
-			const result = await this.connector.sendTransaction({
-				validUntil: DateTime.now().plus({ seconds: this.validUntil }).toUnixInteger(),
-				messages: Array.isArray(messages) ? messages : [messages],
-			})
+			const result = await this.provider.sender()?.send(args)
 
 			return result
 		} catch (e: any) {
@@ -70,29 +77,27 @@ export class LectureContractConnector {
 		}
 	}
 
-	static init(connector: TonConnect) {
-		return new LectureContractConnector(connector)
-	}
-
 	cancel = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
 		try {
-			const body = beginCell().storeUint(LectureContract.OPERATION.CANCEL, 32).endCell()
+			const sender = this.provider.sender()
+			if (!sender) return
 
-			const result: any = await this.send({
-				address: address.toString(),
-				amount: toNano('0.1').toString(),
-				payload: Base64.encode(body.toBoc()),
-			})
-
-			if (result?.error) {
-				throw new Error(`${result?.error}. ${result?.description} `)
+			if (!(await this.provider.isContractDeployed(address))) {
+				console.log(`Error: Contract at address ${address} is not deployed!`)
+				return
 			}
 
-			console.log('[cancel]', result)
+			const lectureContract = await this.provider.open(Lecture.createFromAddress(address))
+			await lectureContract.sendCancel(sender)
 
-			onSuccess()
+			let attempt = 1
+			while ((await this.provider.isContractDeployed(address)) || attempt <= 30) {
+				console.log(`Attempt ${attempt}`)
+				await sleep(2000)
+				attempt++
+			}
 
-			return result
+			console.log('Lecture cancel successfully!')
 		} catch (e: any) {
 			console.error(e)
 
@@ -102,26 +107,22 @@ export class LectureContractConnector {
 
 	deploy = async (config: any, workchain?: number) => {
 		try {
-			const deployPrice = LectureContract.START_LESSON_PRICE || '1'
+			const sender = this.provider.sender()
+			if (!sender) return
+
+			console.log('Start Lecture deploying...')
+
 			const initCode = Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0]
-			const lecture = LectureContract.createFromConfig(config, initCode, workchain)
-			const stateInitCell = beginCell()
-				.store(storeStateInit(lecture.init as StateInit))
-				.endCell()
+			const lectureContract = await this.provider.open(Lecture.createFromConfig(config, initCode, workchain))
+			await lectureContract.sendDeploy(sender)
 
-			const result: any = await this.send({
-				address: lecture.address.toString(),
-				amount: toNano(deployPrice).toString(),
-				stateInit: Base64.encode(stateInitCell.toBoc()),
-			})
+			console.log('Message with deploy sent')
 
-			if (result?.error) {
-				throw new Error(`${result?.error}. ${result?.description} `)
-			}
+			await this.provider.waitForDeploy(lectureContract.address)
+			
+			console.log('Lecture deployed')
 
-			await waitForDeploy(lecture.address)
-
-			return { lectureAddress: lecture.address.toString() }
+			return { lectureAddress: lectureContract.address.toString() }
 		} catch (e: any) {
 			console.error(e)
 
@@ -131,22 +132,13 @@ export class LectureContractConnector {
 
 	pay = async ({ address, amount, onSuccess = () => {} }: LecturePayArgs) => {
 		try {
-			const body = beginCell().storeUint(LectureContract.OPERATION.PAY, 32).endCell()
+			const sender = this.provider.sender()
+			if (!sender) return
 
-			const result: any = await this.send({
-				address: address.toString(), //contract address
-				amount: toNano(amount.toString()).toString(),
-				payload: Base64.encode(body.toBoc()), // init data
-			})
-
-			if (result?.error) {
-				throw new Error(`${result?.error}. ${result?.description} `)
-			}
+			const lectureContract = await this.provider.open(Lecture.createFromAddress(address))
+			await lectureContract.sendPay(sender, toNano(amount))
 
 			onSuccess()
-
-			console.log('[pay]', result)
-			return result
 		} catch (error: any) {
 			return { error: error.message }
 		}
@@ -154,23 +146,13 @@ export class LectureContractConnector {
 
 	sendReport = async ({ address, onSuccess = () => {} }: LectureCancelArgs) => {
 		try {
-			const body = beginCell().storeUint(LectureContract.OPERATION.REPORT, 32).endCell()
+			const sender = this.provider.sender()
+			if (!sender) return
 
-			const result: any = await this.send({
-				address: address.toString(),
-				amount: toNano('0.1').toString(),
-				payload: Base64.encode(body.toBoc()),
-			})
-
-			if (result?.error) {
-				throw new Error(`${result?.error}. ${result?.description} `)
-			}
-
-			console.log('[report]', result)
+			const lectureContract = await this.provider.open(Lecture.createFromAddress(address))
+			await lectureContract.sendReport(sender)
 
 			onSuccess()
-
-			return result
 		} catch (e: any) {
 			console.error(e)
 

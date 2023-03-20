@@ -152,9 +152,9 @@ export class Lecture implements Contract {
         return new Lecture(contractAddress(workchain, stateInit), stateInit);
     }
 
-    async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
+    async sendDeploy(provider: ContractProvider, via: Sender, value?: bigint) {
         await provider.internal(via, {
-            value,
+            value: value || toNano(Lecture.START_LESSON_PRICE),
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().endCell(),
         });
@@ -278,8 +278,6 @@ export class Lecture implements Contract {
             const result = await provider.get('get_all_data', []);
             const tuple = result.stack;
 
-            
-
             data = {
                 ...data,
                 startTime: tuple.readNumber(),
@@ -300,10 +298,10 @@ export class Lecture implements Contract {
             return;
         }
     }
-    
+
     async getVersion(provider: ContractProvider) {
         const result = await provider.get('get_version', []);
-        const version = result.stack.readNumber()
+        const version = result.stack.readNumber();
 
         return version;
     }

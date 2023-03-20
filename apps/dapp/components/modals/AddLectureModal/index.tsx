@@ -4,11 +4,15 @@ import { useForm } from 'antd/lib/form/Form'
 import dayjs, { Dayjs } from 'dayjs'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
-import { Address } from 'ton-core'
+import { Address, Cell, toNano } from 'ton-core'
 import { SettingsContext } from '@/contexts/settings'
 import { TonContext } from '@/contexts/ton-context'
 import { fetcher } from '@/helpers/fetcher'
-import { LectureContractConnector } from '@/services/ton/lecture-connector'
+import { TonNetworkProvider } from '@/services/ton/provider'
+import { code, wrapper } from 'lecture-contract'
+import { LectureConfig } from 'lecture-contract/wrappers/Lecture'
+
+const { Lecture } = wrapper
 
 interface AddLectureModalParams {
 	open: boolean
@@ -50,24 +54,45 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 			})
 
 			const startTime = data.date.set('hour', data.time.hour()).set('minute', data.time.minute()).set('second', 0)
-			const lectureConnector = LectureContractConnector.init(connector)
-			const result = await lectureConnector.deploy({
+			const initCode = Cell.fromBoc(Buffer.from(code.hex, 'hex'))[0]
+			const initData: LectureConfig = {
 				startTime: startTime.unix(),
-				goal: data.price || 0,
+				goal: toNano(data.price),
 				serviceAddress: Address.parse(settings.serviceWallet),
 				managerAddress: Address.parse(community.managerAddress),
 				lecturerAddress: Address.parse(userWallet.account.address),
-			})
-
-			if (result.hasOwnProperty('error')) {
-				throw new Error(result.error)
 			}
+
+			const provider = new TonNetworkProvider(connector, network)
+			const sender = provider.sender()
+			const lectureContract = await provider.open(Lecture.createFromConfig(initData, initCode))
+
+			console.log('Start Lecture deploying...')
+
+			if (sender) await lectureContract.sendDeploy(sender)
+
+			console.log('Transaction sent')
+
+			await provider.waitForDeploy(lectureContract.address)
+
+			// const lectureConnector = LectureContractConnector.init(connector)
+			// const result = await lectureConnector.deploy({
+			// 	startTime: startTime.unix(),
+			// 	goal: data.price || 0,
+			// 	serviceAddress: Address.parse(settings.serviceWallet),
+			// 	managerAddress: Address.parse(community.managerAddress),
+			// 	lecturerAddress: Address.parse(userWallet.account.address),
+			// })
+
+			// if (result.hasOwnProperty('error')) {
+			// 	throw new Error(result.error)
+			// }
 
 			await addLecture({
 				title: data.title,
 				description: data.description,
 				date: startTime.toISOString(),
-				contractAddress: result.lectureAddress,
+				contractAddress: lectureContract.address,
 				price: data.price,
 				duration: data.duration,
 			})
@@ -107,9 +132,18 @@ export const AddLectureModal = ({ open, onFinish, onCancel }: AddLectureModalPar
 			{contextHolder}
 			<Modal forceRender open={open} confirmLoading={newLectureAdding || creating} onCancel={onCancel} onOk={handleAddPaidLecture} title="New paid lecture">
 				<Spin spinning={newLectureAdding || creating}>
-					<Form form={form} layout="vertical" requiredMark="optional" initialValues={{ duration: 30 }} onValuesChange={(_, values) => setFormData(values)}>
+					<Form
+						form={form}
+						layout="vertical"
+						requiredMark="optional"
+						initialValues={{ duration: 30, community: 'Game Developers Hub' }}
+						onValuesChange={(_, values) => setFormData(values)}
+					>
 						<Form.Item name="title" label="Title" rules={[{ required: true }]}>
-							<Input />
+							<Input size="large" />
+						</Form.Item>
+						<Form.Item name="community" label="Community" rules={[{ required: true }]}>
+							<Input disabled />
 						</Form.Item>
 						<Row gutter={[16, 16]}>
 							<Col>

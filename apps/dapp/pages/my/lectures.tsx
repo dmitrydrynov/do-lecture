@@ -31,7 +31,7 @@ const MyLecturesPage = ({ user }: any) => {
 				{connector?.connected && (
 					<>
 						<Space direction="vertical" style={{ width: '100%' }}>
-							<Button onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button>
+							<Button type="primary" onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button>
 							<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
 						</Space>
 

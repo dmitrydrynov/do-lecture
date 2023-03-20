@@ -3,7 +3,7 @@ import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 import { getFundingPaidLectures } from '@/services/airtable'
-import { initLectureContract } from '@/services/ton'
+import { initLectureContract } from '@/services/ton/provider'
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {

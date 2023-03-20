@@ -23,8 +23,6 @@ export function addReturnStrategy(url: string, returnStrategy: 'back' | 'none'):
 export const renderPrice = (price: string | number, style: 'currency' | 'decimal' = 'currency') => {
 	if (price == undefined) return null
 
-	console.log(fromNano(price))
-
 	return new Intl.NumberFormat('ru', {
 		style,
 		currency: 'TON',
