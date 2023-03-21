@@ -153,6 +153,7 @@ export class Lecture implements Contract {
     }
 
     async sendDeploy(provider: ContractProvider, via: Sender, value?: bigint) {
+        debugger
         await provider.internal(via, {
             value: value || toNano(Lecture.START_LESSON_PRICE),
             sendMode: SendMode.PAY_GAS_SEPARATELY,

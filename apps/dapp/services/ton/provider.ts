@@ -1,13 +1,13 @@
 import { TonConnect } from '@tonconnect/sdk'
 import { Base64 } from '@tonconnect/protocol'
-import { Address, beginCell, Cell, Contract, internal, MessageRelaxed, OpenedContract, Sender, SendMode, StateInit, storeStateInit, TonClient, WalletContractV4 } from 'ton'
+import { Address, beginCell, Cell, Contract, ContractProvider, internal, MessageRelaxed, OpenedContract, Sender, SendMode, StateInit, storeStateInit, TonClient, WalletContractV4 } from 'ton'
 import { KeyPair, mnemonicToPrivateKey } from 'ton-crypto'
 import { Maybe } from 'ton/dist/utils/maybe'
 import { wrapper } from 'lecture-contract'
 
 const { Lecture } = wrapper
 
-const tonClient = () => {
+export const tonClient = () => {
 	const isTestnet = process.env.IS_TESTNET === 'true'
 	const endpoint = isTestnet ? 'https://testnet.toncenter.com/api/v2/jsonRPC' : 'https://toncenter.com/api/v2/jsonRPC'
 
@@ -18,6 +18,37 @@ const tonClient = () => {
 
 	return provider
 }
+
+export async function waitForDeploy(address: Address, attempts: number = 30, sleepDuration: number = 2000) {
+	const provider = tonClient()
+
+	try {
+		if (attempts <= 0) {
+			throw new Error('Attempt number must be positive')
+		}
+
+		console.log(`Deploying ${address.toString()} contract...`)
+
+		for (let i = 1; i <= attempts; i++) {
+			const isDeployed = await provider.isContractDeployed(address)
+
+			if (isDeployed) {
+				console.log('This contract is deployed')
+				return true
+			}
+
+			console.log('Attempt', i + 1)
+			await sleep(sleepDuration)
+		}
+
+		throw new Error("Contract was not deployed. Check your wallet's transactions")
+	} catch (error: any) {
+		console.error(error)
+		throw new Error(error.message)
+	}
+}
+
+
 
 export const initLectureContract = async (address: Address) => {
 	const provider = tonClient()
