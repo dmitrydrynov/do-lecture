@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { HeartTwoTone } from '@ant-design/icons'
 import Icon from '@ant-design/icons'
-import { Button, InputNumber, List, message, Progress, Space, Typography } from 'antd'
+import { Button, InputNumber, List, message, Progress, Space, Table, Typography } from 'antd'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address, toNano } from 'ton'
@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 import { Lecture } from 'lecture-contract/wrappers/Lecture'
 import { sleep } from '@/services/ton/provider'
 import { UserRejectsError } from '@tonconnect/sdk'
+import { ColumnsType } from 'antd/es/table'
 
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
 	const { connector, provider, network, userWallet } = useContext(TonContext)
@@ -109,10 +110,52 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		}
 	}
 
+	const columns: ColumnsType<any> = [
+		{
+			title: 'Date',
+			dataIndex: 'date',
+			key: 'name',
+			render: (date) => {
+				const isCurrentYear = dayjs(date).year() == dayjs().year()
+				return isCurrentYear ? dayjs(date).format('D MMM [at] hh:mm') : dayjs(date).format('D MMM YYYY [at] hh:mm')
+			},
+		},
+		{
+			title: 'Title',
+			dataIndex: 'title',
+			key: 'name',
+		},
+		{
+			title: 'Status',
+			dataIndex: 'status',
+			key: 'status',
+			align: 'center',
+		},
+		{
+			title: 'Required amount, TON',
+			dataIndex: 'price',
+			align: 'right',
+			key: 'price',
+		},
+		{
+			key: 'actions',
+			render: (record) => {
+				return (
+					<Space>
+						<Button>Public</Button>
+						<Button>Edit</Button>
+						<Button>Delete</Button>
+					</Space>
+				)
+			},
+		},
+	]
+
 	return (
 		<>
 			{contextHolder}
-			<List
+			<Table dataSource={data} columns={columns} pagination={false} />
+			{/* <List
 				loading={isLoading}
 				bordered
 				dataSource={data}
@@ -120,69 +163,46 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 					<List.Item
 						key={key}
 						actions={[
-							!!lecture.meta && <div key={0}>{dayjs(lecture.meta.startTime * 1000).toString()}</div>,
-							<span key="paid">{lecture.meta?.paymentCount}</span>,
-							<span key="reports">{lecture.meta?.reportsCount}</span>,
-							<InputNumber
-								style={{ width: '110px' }}
-								key="pay-amount"
-								max={1}
-								min={0.01}
-								step={0.1}
-								addonAfter="TON"
-								size="small"
-								maxLength={6}
-								defaultValue={amount}
-								onChange={(value) => (value ? setAmount(value) : null)}
-							/>,
-							<Button key="pay-lecture" onClick={() => handlePayLecture(lecture)}>
-								Оплатить
+							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
+								Опубликовать
+							</Button>,
+							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
+								Редактировать
+							</Button>,
+							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
+								Удалить
 							</Button>,
 						]}
 					>
 						<List.Item.Meta
 							title={
 								<>
-									{<HeartTwoTone twoToneColor={lecture.meta?.state == 'active' ? 'lightgreen' : 'red'} />} {lecture.title} ({renderPrice(lecture.meta?.paidTotal, 'decimal')} из{' '}
-									{renderPrice(lecture.meta?.goal)}
-									)
-									<Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+									{lecture.status == 'published' && <HeartTwoTone twoToneColor={lecture.meta?.state == 'active' ? 'lightgreen' : 'red'} />} {lecture.title} ({renderPrice(lecture.meta?.paidTotal, 'decimal')} из{' '}
+									{renderPrice(lecture.meta?.goal)})
+									{lecture.status == 'published' && <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />}
 								</>
 							}
 							description={
-								<>
-									<Typography.Paragraph
-										copyable={{
-											icon: <Icon component={TonScanSvg} style={{ scale: '1.5', color: '#aaa' }} />,
-											tooltips: ['See on tonscan.org'],
-											onCopy: () => {
-												window.open(`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${lecture.contractAddress}`, '_blank')
-											},
-										}}
-									>
-										{lecture.contractAddress}
-									</Typography.Paragraph>
-									<Space>
-										{['funding', 'run-up'].includes(lecture.stage) && (
-											<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
-												Отменить
-											</Button>
-										)}
-										{['implementation'].includes(lecture.stage) && (
-											<Button key="add-complaint" onClick={() => handleAddReport(lecture)}>
-												Пожаловаться
-											</Button>
-										)}
-										<Button key="resolve-complaint" onClick={() => {}}>
-											Решить жалобу
-										</Button>
-									</Space>
-								</>
+								lecture.status == 'published' && (
+									<>
+										<Typography.Paragraph
+											copyable={{
+												icon: <Icon component={TonScanSvg} style={{ scale: '1.5', color: '#aaa' }} />,
+												tooltips: ['See on tonscan.org'],
+												onCopy: () => {
+													window.open(`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${lecture.contractAddress}`, '_blank')
+												},
+											}}
+										>
+											{lecture.contractAddress}
+										</Typography.Paragraph>
+									</>
+								)
 							}
 						/>
 					</List.Item>
 				)}
-			/>
+			/> */}
 		</>
 	)
 }

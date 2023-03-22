@@ -50,35 +50,6 @@ export const tonApi = () => {
 	})
 }
 
-export async function waitForDeploy(address: Address, attempts: number = 30, sleepDuration: number = 2000) {
-	const provider = tonApi()
-
-	try {
-		if (attempts <= 0) {
-			throw new Error('Attempt number must be positive')
-		}
-
-		console.log(`Deploying ${address.toString()} contract...`)
-
-		for (let i = 1; i <= attempts; i++) {
-			const isDeployed = await provider.isContractDeployed(address)
-
-			if (isDeployed) {
-				console.log('This contract is deployed')
-				return true
-			}
-
-			console.log('Attempt', i + 1)
-			await sleep(sleepDuration)
-		}
-
-		throw new Error("Contract was not deployed. Check your wallet's transactions")
-	} catch (error: any) {
-		console.error(error)
-		throw new Error(error.message)
-	}
-}
-
 export const initLectureContract = async (address: Address) => {
 	const provider = tonApi()
 	const contract = Lecture.createFromAddress(address)
@@ -230,23 +201,3 @@ export const sleep = async (ms: number) => {
 		setTimeout(resolve, ms)
 	})
 }
-
-// export class TonConnectProvider implements ContractProvider {
-// 	connector: TonConnect
-
-// 	constructor(connector: TonConnect) {
-// 		this.connector = connector
-// 	}
-
-// 	async getState() {
-// 		this.connector.api
-// 		return {} as ContractState
-// 	}
-
-// 	async get(name: string, args: TupleItem[]) {
-// 		return {} as ContractGetMethodResult
-// 	}
-
-// 	async external(message: Cell) {}
-// 	async internal(via: Sender, args: { value: bigint | string; bounce?: Maybe<boolean>; sendMode?: SendMode; body?: Maybe<Cell | string> }) {}
-// }

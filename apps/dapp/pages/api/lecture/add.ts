@@ -16,7 +16,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 			date,
 			duration,
 			status: isDraft ? 'draft' : 'published',
-			stage: 'funding',
+			stage: isDraft ? 'preparation' : 'funding',
 			contractAddress: (contractAddress as string) || '',
 			price: (price as number) || 0,
 			community,

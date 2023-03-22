@@ -1,4 +1,4 @@
-import Airtable from 'airtable'
+import Airtable, { FieldSet, Record as AirtableRecord, Records as AirtableRecords } from 'airtable'
 import { Attachment } from 'airtable/lib/attachment'
 import { Collaborator } from 'airtable/lib/collaborator'
 import dayjs from 'dayjs'
@@ -45,18 +45,18 @@ export const cancelLecture = async (id: string) => {
 	}
 }
 
-export const getPaidLecturesByLecturer = async (userId: string, status: string[] = ['published']) => {
+export const getPaidLecturesByUser = async (userId: string, status: string[] = ['published']) => {
 	try {
 		const list = await AirtableService('Lecture')
 			.select({
-				filterByFormula: `AND(lecturer = "${userId}", FIND(status, "${status.join(' ')}"), price > 0, LEN(contractAddress) > 0)`,
+				filterByFormula: `AND(lecturer = "${userId}", FIND(status, "${status.join(' ')}"), price > 0)`,
 			})
 			.all()
 
-		return list.map((l: any) => ({ id: l.id, ...l.fields }))
+		return list?.length > 0 ? list.map((l) => parseAirtableRecord(l)) : []
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		return null
+		throw error
 	}
 }
 
@@ -70,7 +70,7 @@ export const getFundingPaidLectures = async () => {
 			})
 			.all()
 
-		return list.map((l: any) => ({ id: l.id, ...l.fields }))
+		return list.map((l: any) => parseAirtableRecord(l))
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
 		return null
@@ -86,7 +86,7 @@ export const getRunupPaidLectures = async () => {
 			})
 			.all()
 
-		return list.map((l: any) => ({ id: l.id, ...l.fields }))
+		return list.map((l: any) => parseAirtableRecord(l))
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
 		return null
@@ -99,7 +99,7 @@ export const createUser = async ({ hash }: any) => {
 		roles: ['member'],
 	})
 
-	return { id: user.id, ...user.fields }
+	return parseAirtableRecord(user)
 }
 
 export const findUserByHash = async ({ hash }: any) => {
@@ -111,19 +111,19 @@ export const findUserByHash = async ({ hash }: any) => {
 		.all()
 	const user = users[0] || null
 
-	return user ? { id: user.id, ...user.fields } : null
+	return user ? parseAirtableRecord(user) : null
 }
 
 export const getLecture = async (id: string) => {
 	const lecture = await AirtableService('Lecture').find(id)
 
-	return { id: lecture.id, ...lecture.fields }
+	return parseAirtableRecord(lecture)
 }
 
 export const getCommunity = async (id: string) => {
 	const community = await AirtableService('Community').find(id)
 
-	return { id: community.id, ...community.fields }
+	return parseAirtableRecord(community)
 }
 
 export const getSettings = async () => {
@@ -138,4 +138,8 @@ export const getSettings = async () => {
 	})
 
 	return Object.entries(response).length > 0 ? response : null
+}
+
+const parseAirtableRecord = (record: AirtableRecord<FieldSet>): { id: string; [key: string]: any } => {
+	return { id: record.id, ...record.fields }
 }

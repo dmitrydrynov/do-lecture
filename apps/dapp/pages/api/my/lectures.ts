@@ -3,7 +3,7 @@ import { defaultCookie } from 'config/cookie'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
-import { getPaidLecturesByLecturer } from '@/services/airtable'
+import { getPaidLecturesByUser } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton/provider'
 import dayjs from 'dayjs'
 
@@ -12,29 +12,30 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 		if (req.method !== 'POST' || !req.session?.user?.id) return res.status(503).end()
 
 		const response: any[] = []
-		let lectures = await getPaidLecturesByLecturer(req.session.user.id)
+		let meta = {}
+		let lectures = await getPaidLecturesByUser(req.session.user.id, ['published', 'draft'])
 
-		if (lectures) {
+		if (lectures?.length) {
 			for (const l of lectures) {
+				// if lecture is paid
 				if (l.price && (l.price as number) > 0) {
-					const address = Address.parse(l.contractAddress as string)
-					const contract = await initLectureContract(address)
+					// for published only
+					if (l.status == 'published') {
+						const address = Address.parse(l.contractAddress as string)
+						const contract = await initLectureContract(address)
 
-					if (!contract) continue
-
-					const meta = await contract.getData()
-					// const stage = await contract.getStage()
-
-					console.log('version', await contract.getVersion())
+						meta = await contract?.getData()
+					}
 
 					response.push({
 						...l,
 						meta: {
 							...meta,
-							// stage,
 						},
 					})
-				} else {
+				}
+				// else for free one
+				else {
 					response.push({
 						...l,
 						meta: { stage: l.stage },
