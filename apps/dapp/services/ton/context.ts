@@ -3,9 +3,12 @@ import { createContext, useEffect, useState } from 'react'
 import TonConnect, { CHAIN, TonConnectError, Wallet, WalletInfo } from '@tonconnect/sdk'
 import { Address } from 'ton'
 import { sha256 } from 'ton-crypto'
+import { TonConnectProvider } from '@/services/ton/provider'
 
 export type TonContextType = {
 	connector?: TonConnect
+	isConnected: boolean
+	provider?: TonConnectProvider
 	userWallet?: Wallet
 	network?: 'testnet' | 'mainnet'
 	availableWallets?: WalletInfo[]
@@ -16,7 +19,7 @@ const networkName: { [key: string]: 'testnet' | 'mainnet' } = {
 	[CHAIN.TESTNET]: 'testnet',
 }
 
-export const TonContext = createContext<TonContextType>({})
+export const TonContext = createContext<TonContextType>({ isConnected: false })
 
 export const useTonContext = ({ onConnectError }: any) => {
 	const [connector, setConnector] = useState<TonConnect>()
@@ -24,6 +27,7 @@ export const useTonContext = ({ onConnectError }: any) => {
 	const [userWallet, setUserWallet] = useState<Wallet>()
 	const [network, setNetwork] = useState<'testnet' | 'mainnet'>()
 	const [user, setUser] = useState()
+	const [provider, setProvider] = useState<TonConnectProvider>()
 
 	useEffect(() => {
 		const connector = new TonConnect({
@@ -39,6 +43,9 @@ export const useTonContext = ({ onConnectError }: any) => {
 	useEffect(() => {
 		if (!connector) return
 
+		const p = new TonConnectProvider(connector, network)
+		setProvider(p)
+
 		connector.getWallets().then((list) => {
 			const actualForApp = ['Tonkeeper', 'OpenMask', 'MyTonWallet']
 			setAvailableWallets(
@@ -51,15 +58,14 @@ export const useTonContext = ({ onConnectError }: any) => {
 				})
 			)
 		})
-	}, [connector])
+	}, [connector, network])
 
 	const handleError = async (error: TonConnectError) => {
 		onConnectError(error)
 	}
 
 	const handleStatusChange = async (wallet?: any) => {
-if(user) return
-
+		if (user) return
 
 		if (!wallet) {
 			setUserWallet(undefined)
@@ -90,5 +96,5 @@ if(user) return
 		console.log(`Connected to wallet [${walletAdress}]`)
 	}
 
-	return { connector, availableWallets, userWallet, network, user }
+	return { connector, isConnected: connector ? connector?.connected : false, provider, availableWallets, userWallet, network, user }
 }

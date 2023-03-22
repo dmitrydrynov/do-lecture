@@ -7,7 +7,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 	try {
 		if (req.method !== 'POST' || !req.session?.user?.id) return res.status(503).end()
 
-		const { contractAddress, date, price, description, title, duration, isDraft } = req.body
+		const { contractAddress, date, price, description, title, duration, isDraft, community } = req.body
 
 		const lecture = await createLecture({
 			title,
@@ -19,6 +19,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 			stage: 'funding',
 			contractAddress: (contractAddress as string) || '',
 			price: (price as number) || 0,
+			community,
 		})
 
 		res.status(200).json({ lecture })

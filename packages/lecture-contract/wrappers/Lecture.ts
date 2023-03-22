@@ -153,39 +153,50 @@ export class Lecture implements Contract {
     }
 
     async sendDeploy(provider: ContractProvider, via: Sender, value?: bigint) {
-        debugger
-        await provider.internal(via, {
-            value: value || toNano(Lecture.START_LESSON_PRICE),
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().endCell(),
-        });
+        try {
+            await provider.internal(via, {
+                value: value || toNano(Lecture.START_LESSON_PRICE),
+                sendMode: SendMode.PAY_GAS_SEPARATELY,
+                body: beginCell().endCell(),
+            });
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async sendPay(provider: ContractProvider, via: Sender, value: bigint) {
-        await provider.internal(via, {
-            value,
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(Lecture.OPERATION.PAY, 32).endCell(),
-        });
+        try {
+            await provider.internal(via, {
+                value,
+                sendMode: SendMode.PAY_GAS_SEPARATELY,
+                body: beginCell().storeUint(Lecture.OPERATION.PAY, 32).endCell(),
+            });
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async sendCancel(provider: ContractProvider, via: Sender) {
-        const body = beginCell().storeUint(Lecture.OPERATION.CANCEL, 32).endCell();
+        try {
+            const body = beginCell().storeUint(Lecture.OPERATION.CANCEL, 32).endCell();
+            provider.getState();
 
-        await provider.internal(via, {
-            value: toNano('0.1'),
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body,
-        });
+            await provider.internal(via, {
+                value: toNano('0.1'),
+                sendMode: SendMode.PAY_GAS_SEPARATELY,
+                body,
+            });
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     // if not funded payback money for senders, if funned - nothing
     async sendTryStart(provider: ContractProvider) {
         try {
             await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_START, 32).endCell());
-        } catch (e) {
-            console.log(e);
-            return;
+        } catch (e: any) {
+            throw e;
         }
     }
 
@@ -193,42 +204,57 @@ export class Lecture implements Contract {
     async sendTryPayout(provider: ContractProvider) {
         try {
             await provider.external(beginCell().storeUint(Lecture.OPERATION.TRY_PAYOUT, 32).endCell());
-        } catch (e) {
-            console.log(e);
-            return;
+        } catch (e: any) {
+            throw e;
         }
     }
 
     // user function, user isn't a sender or a teacher, can do after lecture start
     async sendReport(provider: ContractProvider, via: Sender) {
-        await provider.internal(via, {
-            value: toNano('0.1'),
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(Lecture.OPERATION.REPORT, 32).endCell(),
-        });
+        try {
+            await provider.internal(via, {
+                value: toNano('0.1'),
+                sendMode: SendMode.PAY_GAS_SEPARATELY,
+                body: beginCell().storeUint(Lecture.OPERATION.REPORT, 32).endCell(),
+            });
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     // manager function, manager isn't a sender or a teacher, can do after lecture start and before destroy
     async sendReportSolve(provider: ContractProvider, via: Sender, reportNo: number, satisfy: boolean) {
-        await provider.internal(via, {
-            value: toNano('0.1'),
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell()
-                .storeUint(Lecture.OPERATION.SOLVE, 32)
-                .storeUint(reportNo, 16)
-                .storeBit(satisfy)
-                .endCell(),
-        });
+        try {
+            await provider.internal(via, {
+                value: toNano('0.1'),
+                sendMode: SendMode.PAY_GAS_SEPARATELY,
+                body: beginCell()
+                    .storeUint(Lecture.OPERATION.SOLVE, 32)
+                    .storeUint(reportNo, 16)
+                    .storeBit(satisfy)
+                    .endCell(),
+            });
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async getStartTime(provider: ContractProvider) {
-        const result = await provider.get('get_start_time', []);
-        return result.stack.readNumber();
+        try {
+            const result = await provider.get('get_start_time', []);
+            return result.stack.readNumber();
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async getLeftAndGoal(provider: ContractProvider) {
-        const result = await provider.get('get_left_goal', []);
-        return { left: result.stack.readNumber(), goal: result.stack.readNumber() };
+        try {
+            const result = await provider.get('get_left_goal', []);
+            return { left: result.stack.readNumber(), goal: result.stack.readNumber() };
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async getPaymentsByUser(provider: ContractProvider, address: Address) {
@@ -242,9 +268,8 @@ export class Lecture implements Contract {
             const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
 
             return payments;
-        } catch (e) {
-            console.log(e);
-            return;
+        } catch (e: any) {
+            throw e;
         }
     }
 
@@ -254,17 +279,20 @@ export class Lecture implements Contract {
             const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
 
             return payments;
-        } catch (e) {
-            console.log(e);
-            return;
+        } catch (e: any) {
+            throw e;
         }
     }
 
     async getReports(provider: ContractProvider) {
-        const result = await provider.get('get_reports', []);
-        const reports = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), ReportsDictValue);
+        try {
+            const result = await provider.get('get_reports', []);
+            const reports = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), ReportsDictValue);
 
-        return reports;
+            return reports;
+        } catch (e: any) {
+            throw e;
+        }
     }
 
     async getData(provider: ContractProvider) {
@@ -294,16 +322,19 @@ export class Lecture implements Contract {
             data.paidTotal = data.goal - data.left;
 
             return data;
-        } catch (error: any) {
-            console.log(error);
-            return;
+        } catch (e: any) {
+            throw e;
         }
     }
 
     async getVersion(provider: ContractProvider) {
-        const result = await provider.get('get_version', []);
-        const version = result.stack.readNumber();
+        try {
+            const result = await provider.get('get_version', []);
+            const version = result.stack.readNumber();
 
-        return version;
+            return version;
+        } catch (e: any) {
+            throw e;
+        }
     }
 }

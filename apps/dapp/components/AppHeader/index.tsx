@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { TonContext } from '@/contexts/ton-context'
+import { TonContext } from '@/services/ton/context'
 import { Button, Row, Layout, Col, Space, Tag } from 'antd'
 import Link from 'next/link'
 import styles from './style.module.css'

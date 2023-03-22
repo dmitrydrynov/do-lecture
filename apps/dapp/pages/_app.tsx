@@ -5,7 +5,7 @@ import { appTheme } from 'config/theme'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { SettingsContext, useSettingsContext } from '@/contexts/settings'
-import { TonContext, useTonContext } from '@/contexts/ton-context'
+import { TonContext, useTonContext } from '@/services/ton/context'
 
 dayjs.extend(relativeTime)
 

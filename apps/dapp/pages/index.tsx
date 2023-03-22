@@ -1,7 +1,7 @@
 import { ReactElement, useContext, useState } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { LecturesList } from '@/components/LecturesList'
-import { TonContext } from '@/contexts/ton-context'
+import { TonContext } from '@/services/ton/context'
 import styles from '@/styles/Home.module.css'
 import { Typography } from 'antd'
 // import dynamic from 'next/dynamic'

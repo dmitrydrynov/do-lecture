@@ -1,26 +1,57 @@
-import { TonConnect } from '@tonconnect/sdk'
+import {
+	TonConnect,
+	UserRejectsError,
+	UnknownError,
+	BadRequestError,
+	WalletAlreadyConnectedError,
+	ParseHexError,
+	UnknownAppError,
+	FetchWalletsError,
+	WrongAddressError,
+	WalletNotInjectedError,
+	WalletNotConnectedError,
+	LocalstorageNotFoundError,
+} from '@tonconnect/sdk'
 import { Base64 } from '@tonconnect/protocol'
-import { Address, beginCell, Cell, Contract, ContractProvider, internal, MessageRelaxed, OpenedContract, Sender, SendMode, StateInit, storeStateInit, TonClient, WalletContractV4 } from 'ton'
+import {
+	Address,
+	beginCell,
+	Cell,
+	Contract,
+	ContractGetMethodResult,
+	ContractProvider,
+	ContractState,
+	internal,
+	MessageRelaxed,
+	OpenedContract,
+	Sender,
+	SenderArguments,
+	SendMode,
+	StateInit,
+	storeStateInit,
+	toNano,
+	TonClient,
+	TupleItem,
+	WalletContractV4,
+} from 'ton'
 import { KeyPair, mnemonicToPrivateKey } from 'ton-crypto'
 import { Maybe } from 'ton/dist/utils/maybe'
 import { wrapper } from 'lecture-contract'
 
 const { Lecture } = wrapper
 
-export const tonClient = () => {
+export const tonApi = () => {
 	const isTestnet = process.env.IS_TESTNET === 'true'
 	const endpoint = isTestnet ? 'https://testnet.toncenter.com/api/v2/jsonRPC' : 'https://toncenter.com/api/v2/jsonRPC'
 
-	const provider = new TonClient({
+	return new TonClient({
 		endpoint,
-		apiKey: isTestnet ? (process.env.TON_TESTNET_APIKEY as string) : (process.env.TON_MAINNET_APIKEY as string),
+		apiKey: isTestnet ? (process.env.NEXT_PUBLIC_TON_TESTNET_APIKEY as string) : (process.env.NEXT_PUBLIC_TON_MAINNET_APIKEY as string),
 	})
-
-	return provider
 }
 
 export async function waitForDeploy(address: Address, attempts: number = 30, sleepDuration: number = 2000) {
-	const provider = tonClient()
+	const provider = tonApi()
 
 	try {
 		if (attempts <= 0) {
@@ -48,10 +79,8 @@ export async function waitForDeploy(address: Address, attempts: number = 30, sle
 	}
 }
 
-
-
 export const initLectureContract = async (address: Address) => {
-	const provider = tonClient()
+	const provider = tonApi()
 	const contract = Lecture.createFromAddress(address)
 	const openedContract = provider.open(contract)
 	const contractState = await provider.getContractState(address)
@@ -85,52 +114,12 @@ export const initLectureContract = async (address: Address) => {
 // 	return await lecture?.getData()
 // }
 
-export class MnemonicConnect {
-	wallet: WalletContractV4
-	account: { address: string; workchain: number }
-	connector: OpenedContract<WalletContractV4>
-	private keys: KeyPair
+export class TonConnectProvider {
+	connector: TonConnect
+	network: string
 
-	private constructor(wallet: WalletContractV4, keys: KeyPair) {
-		this.keys = keys
-		this.wallet = wallet
-		this.connector = this.api().open(wallet)
-		this.account = { address: wallet.address.toRawString(), workchain: wallet.workchain }
-	}
-
-	static async init(mnemonics: string, walletVersion: string = 'v4', workchain = 0) {
-		const keys = await mnemonicToPrivateKey(mnemonics.split(' '))
-		const wallet = WalletContractV4.create({ workchain, publicKey: keys.publicKey })
-
-		return new MnemonicConnect(wallet, keys)
-	}
-
-	async sendTransaction(args: { messages: MessageRelaxed[]; sendMode?: Maybe<SendMode>; timeout?: Maybe<number> }) {
-		const seqno = await this.connector.getSeqno()
-		return this.connector?.sendTransfer({ ...args, seqno, secretKey: this.keys.secretKey })
-	}
-
-	api() {
-		const isTestnet = process.env.IS_TESTNET === 'true'
-		const endpoint = isTestnet ? 'https://testnet.toncenter.com/api/v2/jsonRPC' : 'https://toncenter.com/api/v2/jsonRPC'
-
-		const api = new TonClient({
-			endpoint,
-			apiKey: isTestnet ? (process.env.TON_TESTNET_APIKEY as string) : (process.env.TON_MAINNET_APIKEY as string),
-		})
-
-		return api
-	}
-}
-
-export class TonNetworkProvider {
-	connector: TonConnect | MnemonicConnect
-	private _api: TonClient
-	private network: string
-
-	constructor(connector: TonConnect | MnemonicConnect, network = 'mainnet') {
+	constructor(connector: TonConnect, network = 'mainnet') {
 		this.connector = connector
-		this._api = this.api()
 		this.network = network
 	}
 
@@ -138,55 +127,51 @@ export class TonNetworkProvider {
 		return this.network
 	}
 
-	api() {
+	private api() {
 		const endpoint = this.network == 'testnet' ? 'https://testnet.toncenter.com/api/v2/jsonRPC' : 'https://toncenter.com/api/v2/jsonRPC'
-		const api = new TonClient({
+		return new TonClient({
 			endpoint,
-			apiKey: this.network == 'testnet' ? (process.env.TON_TESTNET_APIKEY as string) : (process.env.TON_MAINNET_APIKEY as string),
+			apiKey: this.network == 'testnet' ? (process.env.NEXT_PUBLIC_TON_TESTNET_APIKEY as string) : (process.env.NEXT_PUBLIC_TON_MAINNET_APIKEY as string),
 		})
-
-		return api
 	}
 
 	sender() {
-		if (!this.connector.account) return
-
 		const sender: Sender = {
-			address: Address.parseRaw(this.connector.account.address),
+			address: this.connector.account ? Address.parseRaw(this.connector.account.address) : undefined,
+			send: async (args: SenderArguments) => {
+				try {
+					const stateInitCell = args.init
+						? beginCell()
+								.store(storeStateInit(args.init as StateInit))
+								.endCell()
+						: undefined
 
-			send: async ({ to, value, init, body }) => {
-				const stateInitCell = init
-					? beginCell()
-							.store(storeStateInit(init as StateInit))
-							.endCell()
-					: undefined
-
-				if (this.connector instanceof TonConnect) {
-					this.connector.sendTransaction({
-						validUntil: 60000,
+					await this.connector.sendTransaction({
 						messages: [
 							{
-								address: to.toString(),
-								amount: value.toString(),
-								payload: body ? Base64.encode(body.toBoc()) : undefined,
-								stateInit: stateInitCell ? Base64.encode(stateInitCell.toBoc()) : undefined,
+								address: args.to.toString(),
+								amount: args.value.toString(),
+								payload: args.body?.toBoc().toString('base64'),
+								stateInit: stateInitCell?.toBoc().toString('base64'),
 							},
 						],
+						validUntil: Date.now() + 5 * 60 * 1000, // 5 minutes for user to approve
 					})
-				}
+				} catch (e) {
+					if (e instanceof UserRejectsError) throw Error('Canceled by the user')
+					if (e instanceof UnknownError) throw Error('Unknown error')
+					if (e instanceof BadRequestError) throw Error('Bad request. The request to the wallet contains errors')
+					if (e instanceof WalletAlreadyConnectedError)
+						throw Error('Wallet connection called but wallet already connected. To avoid the error, disconnect the wallet before doing a new connection.')
+					if (e instanceof ParseHexError) throw Error('Passed hex is in incorrect format')
+					if (e instanceof UnknownAppError) throw Error('App tries to send rpc request to the injected wallet while not connected.')
+					if (e instanceof FetchWalletsError) throw Error('An error occurred while fetching the wallets list.')
+					if (e instanceof WrongAddressError) throw Error('Passed address is in incorrect format.')
+					if (e instanceof WalletNotInjectedError) throw Error('There is an attempt to connect to the injected wallet while it is not exists in the webpage.')
+					if (e instanceof WalletNotConnectedError) throw Error('Send transaction or other protocol methods called while wallet is not connected.')
+					if (e instanceof LocalstorageNotFoundError) throw Error('Storage was not specified in the DappMetadata and default localStorage was not detected in the environment.')
 
-				if (this.connector instanceof MnemonicConnect) {
-					this.connector.sendTransaction({
-						messages: [
-							internal({
-								to,
-								value,
-								body,
-								init,
-							}),
-						],
-						timeout: 60000,
-					})
+					throw Error('Unknown error')
 				}
 			},
 		}
@@ -201,15 +186,15 @@ export class TonNetworkProvider {
 			data: Cell | null
 		} | null
 	) {
-		return this._api.provider(address, init)
+		return this.api().provider(address, init)
 	}
 
 	async isContractDeployed(address: Address) {
-		return await this._api.isContractDeployed(address)
+		return await this.api().isContractDeployed(address)
 	}
 
-	async open<T extends Contract>(contract: T) {
-		return this._api.open(contract)
+	open<T extends Contract>(contract: T) {
+		return this.api().open(contract)
 	}
 
 	async waitForDeploy(address: Address, attempts: number = 30, sleepDuration: number = 2000) {
@@ -245,3 +230,23 @@ export const sleep = async (ms: number) => {
 		setTimeout(resolve, ms)
 	})
 }
+
+// export class TonConnectProvider implements ContractProvider {
+// 	connector: TonConnect
+
+// 	constructor(connector: TonConnect) {
+// 		this.connector = connector
+// 	}
+
+// 	async getState() {
+// 		this.connector.api
+// 		return {} as ContractState
+// 	}
+
+// 	async get(name: string, args: TupleItem[]) {
+// 		return {} as ContractGetMethodResult
+// 	}
+
+// 	async external(message: Cell) {}
+// 	async internal(via: Sender, args: { value: bigint | string; bounce?: Maybe<boolean>; sendMode?: SendMode; body?: Maybe<Cell | string> }) {}
+// }

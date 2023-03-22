@@ -9,7 +9,9 @@
     "NODE_ENV",
     "AIRTABLE_API_KEY",
     "AIRTABLE_BASE_ID",
-    "NEXT_PUBLIC_APP_URL"
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_TON_TESTNET_APIKEY",
+    "NEXT_PUBLIC_TON_MAINNET_APIKEY"
   ],
   "pipeline": {
     "build": {

@@ -4,13 +4,15 @@ import { DownOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Modal, Row, Space, Typography } from 'antd'
 import { QRCode } from 'react-qrcode-logo'
 import styles from './style.module.css'
-import { TonContext } from '@/contexts/ton-context'
+import { TonContext } from '@/services/ton/context'
 import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
 import { useSlicedAddress } from '@/hooks/useSlicedAddress'
+import { useRouter } from 'next/router'
 
 const { Text, Paragraph } = Typography
 
 export const AuthButton = () => {
+	const router = useRouter()
 	const { connector, availableWallets, userWallet, network } = useContext(TonContext)
 	const [selectWalletModal, setSelectWalletModal] = useState(false)
 	const [universalLink, setUniversalLink] = useState('')
@@ -58,6 +60,7 @@ export const AuthButton = () => {
 		if (connector?.connected) {
 			await fetch('/api/auth/logout')
 			await connector.disconnect()
+			await router.push('/')
 		}
 	}
 

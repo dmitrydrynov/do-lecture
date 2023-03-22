@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { MyLectures } from '@/components/MyLectures'
-import { TonContext } from '@/contexts/ton-context'
+import { TonContext } from '@/services/ton/context'
 import styles from '@/styles/Home.module.css'
 
 const AddLectureModal = dynamic(() => import('@/components/modals/AddLectureModal').then((r) => r.AddLectureModal), { ssr: false })

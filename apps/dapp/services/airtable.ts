@@ -9,7 +9,7 @@ const AirtableService = new Airtable({
 
 export default AirtableService
 
-export const createLecture = async ({ title, description, lecturerId, date, contractAddress, duration, status, price, stage }: any) => {
+export const createLecture = async ({ title, description, lecturerId, date, contractAddress, duration, status, price, stage, community }: any) => {
 	try {
 		const newLecture = await AirtableService('Lecture').create({
 			title,
@@ -21,6 +21,7 @@ export const createLecture = async ({ title, description, lecturerId, date, cont
 			stage,
 			price,
 			lecturer: [lecturerId],
+			community: [community],
 		})
 
 		if (!newLecture) return
@@ -44,11 +45,11 @@ export const cancelLecture = async (id: string) => {
 	}
 }
 
-export const getPaidLecturesByLecturer = async (userId: string, status: string = 'published') => {
+export const getPaidLecturesByLecturer = async (userId: string, status: string[] = ['published']) => {
 	try {
 		const list = await AirtableService('Lecture')
 			.select({
-				filterByFormula: `AND(lecturer = "${userId}", status = "${status}", price > 0, LEN(contractAddress) > 0)`,
+				filterByFormula: `AND(lecturer = "${userId}", FIND(status, "${status.join(' ')}"), price > 0, LEN(contractAddress) > 0)`,
 			})
 			.all()
 

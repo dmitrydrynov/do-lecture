@@ -4,18 +4,20 @@ import Icon from '@ant-design/icons'
 import { Button, InputNumber, List, message, Progress, Space, Typography } from 'antd'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
-import { toNano } from 'ton'
+import { Address, toNano } from 'ton'
 import { TonScanSvg } from '../icons/TonScanSvg'
-import { TonContext } from '@/contexts/ton-context'
+import { TonContext } from '@/services/ton/context'
 import { fetcher } from '@/helpers/fetcher'
 import { renderPrice } from '@/helpers/utils'
 import dayjs from 'dayjs'
-import { TonNetworkProvider } from '@/services/ton/provider'
 import { Lecture } from 'lecture-contract/wrappers/Lecture'
+import { sleep } from '@/services/ton/provider'
+import { UserRejectsError } from '@tonconnect/sdk'
 
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
-	const { connector, network, userWallet } = useContext(TonContext)
+	const { connector, provider, network, userWallet } = useContext(TonContext)
 	const [amount, setAmount] = useState<number>(0.01)
+	const [messageApi, contextHolder] = message.useMessage()
 	const { trigger: cancelLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/cancel', (url, { arg }) => fetcher([url, arg]))
 	const {
 		data,
@@ -40,14 +42,11 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	}
 
 	const handlePayLecture = async (lecture: any) => {
-		if (!connector) return
+		if (!provider) return
 
 		try {
-			const provider = new TonNetworkProvider(connector)
-			const sender = provider.sender()
-			const lectureContract = await provider.open(Lecture.createFromAddress(lecture.contractAddress))
-
-			if (sender) await lectureContract.sendPay(sender, toNano(amount))
+			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(lecture.contractAddress)))
+			await lectureContract.sendPay(provider.sender(), toNano(amount))
 		} catch (e: any) {
 			message.error(e.message || 'Оплата лекции не прошла')
 			console.error(e)
@@ -55,43 +54,55 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	}
 
 	const handleCancelLecture = async (lecture: any) => {
-		if (!userWallet || !connector) return
+		if (!userWallet || !provider) return
+
+		messageApi.open({
+			type: 'loading',
+			content: 'Waiting for the lecture closing confirmation...',
+			duration: 0,
+			key: 'cancelLectureProcessing',
+		})
 
 		try {
-			// const res = await cancelLecture({ id: lecture.id })
-			const provider = new TonNetworkProvider(connector)
-			const sender = provider.sender()
-			const lectureContract = await provider.open(Lecture.createFromAddress(lecture.contractAddress))
+			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(lecture.contractAddress)))
+			await lectureContract.sendCancel(provider.sender())
 
-			if (sender) lectureContract.sendCancel(sender)
+			messageApi.open({
+				content: 'The transaction sent. The lecture cancelling...',
+				key: 'cancelLectureProcessing',
+			})
 
-			message.success('Вы отменили лекцию. Все полученные выплаты будут возвращены автоматически.')
+			let attempt = 1
+			while (await provider.isContractDeployed(Address.parse(lecture.contractAddress))) {
+				if (attempt > 30) break
 
-			onUpdate()
+				console.log(`Attempt ${attempt}`)
+				await sleep(2000)
+				attempt++
+			}
+
+			messageApi.open({
+				type: 'success',
+				content: 'Lecture was published',
+				key: 'cancelLectureProcessing',
+			})
 		} catch (e: any) {
-			message.error(e.message || 'Отменить лекцию не удалось.')
+			messageApi.open({
+				type: 'error',
+				content: e.message,
+				key: 'cancelLectureProcessing',
+			})
+
 			console.error(e)
 		}
 	}
 
 	const handleAddReport = async (lecture: any) => {
-		if (!userWallet || !connector) return
+		if (!userWallet || !provider) return
 
 		try {
-			const provider = new TonNetworkProvider(connector)
-			const sender = provider.sender()
-			const lectureContract = await provider.open(Lecture.createFromAddress(lecture.contractAddress))
-
-			if (sender) await lectureContract.sendReport(sender)
-
-			// const lc = LectureConnector.init(connector, lecture.contractAddress)
-			// await lc.sendReport({
-			// 	address: Address.parse(lecture.contractAddress),
-			// 	onSuccess: async () => {
-			// 		onUpdate()
-			// 		message.success('Вы отправили жалобу')
-			// 	},
-			// })
+			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(lecture.contractAddress)))
+			lectureContract.sendReport(provider.sender())
 		} catch (e: any) {
 			message.error(e.message || 'Отменить лекцию не удалось.')
 			console.error(e)
@@ -100,6 +111,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 
 	return (
 		<>
+			{contextHolder}
 			<List
 				loading={isLoading}
 				bordered
