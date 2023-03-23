@@ -43,3 +43,39 @@ export const appTheme: ThemeConfig = {
 		},
 	},
 }
+
+export const defaultTheme: ThemeConfig = {
+	algorithm: theme.darkAlgorithm,
+	token: {
+		borderRadius: 12,
+		colorPrimary: '#25d9b3',
+		colorBgMask: 'rgba(0, 0, 0, 0.75)',
+		colorBgContainer: '#252c33',
+		colorBgElevated: '#1a2026',
+		colorBgLayout: '#1a2026',
+		colorBorder: '#3c4a58',
+		colorBorderSecondary: '#2a333c',
+		fontSize: 15,
+		wireframe: false,
+	},
+	components: {
+		Table: {
+			colorLink: '#25d9b3',
+			colorLinkActive: '#25d9b3',
+			colorLinkHover: '#25d9b3',
+		},
+		Button: {
+			colorLink: '#25d9b3',
+			colorLinkActive: '#25d9b3',
+			colorLinkHover: '#25d9b3',
+		},
+		Typography: {
+			colorLink: '#25d9b3',
+			colorLinkActive: '#25d9b3',
+			colorLinkHover: '#25d9b3',
+		},
+		Select: {
+			controlItemBgActive: '#203c38',
+		},
+	},
+}

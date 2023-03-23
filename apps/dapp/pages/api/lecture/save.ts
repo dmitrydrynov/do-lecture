@@ -1,25 +1,22 @@
 import { defaultCookie } from 'config/cookie'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createLecture } from '@/services/airtable'
+import { saveLecture } from '@/services/airtable'
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
-		if (req.method !== 'POST' || !req.session?.user?.id) return res.status(503).end()
+		const { isDraft, ...data } = req.body
 
-		const { contractAddress, date, price, description, title, duration, isDraft, community } = req.body
+		if (req.method !== 'POST' || !req.session?.user?.id || !data) return res.status(503).end()
 
-		const lecture = await createLecture({
-			title,
-			description,
+		const lecture = await saveLecture({
+			...data,
 			lecturerId: req.session.user.id,
-			date,
-			duration,
 			status: isDraft ? 'draft' : 'published',
 			stage: isDraft ? 'preparation' : 'funding',
-			contractAddress: (contractAddress as string) || '',
-			price: (price as number) || 0,
-			community,
+			contractAddress: data.contractAddress || '',
+			price: (data.price as number) || 0,
+			community: Array.isArray(data.community) ? data.community[0] : data.community,
 		})
 
 		res.status(200).json({ lecture })

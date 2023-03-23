@@ -7,16 +7,16 @@ import { Typography } from 'antd'
 // import dynamic from 'next/dynamic'
 import Head from 'next/head'
 
-// const AddLectureModal = dynamic(() => import('@/components/modals/AddLectureModal').then((r) => r.AddLectureModal), { ssr: false })
+// const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 
 const { Title, Text } = Typography
 
 const Home = ({ user }: any) => {
 	const { connector, userWallet } = useContext(TonContext)
-	const [addLectureModalOpen, setAddLectureModalOpen] = useState(false)
+	const [lectureModalOpen, setLectureModalOpen] = useState(false)
 
 	// const handleAddLecture = () => {
-	// 	setAddLectureModalOpen(false)
+	// 	setLectureModalOpen(false)
 	// refetchLectures()
 	// }
 
@@ -29,7 +29,6 @@ const Home = ({ user }: any) => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<main className={styles.main}>
-				{/* <Button onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button> */}
 				<div className={styles.mainIntro}>
 					<Title>Do or fund lectures</Title>
 					<Text type="secondary">Share lectures for everyone. This is a platform where you can find funding for interesting lectures</Text>
@@ -37,7 +36,7 @@ const Home = ({ user }: any) => {
 				<LecturesList />
 			</main>
 
-			{/* <AddLectureModal open={addLectureModalOpen} onFinish={handleAddLecture} onCancel={() => setAddLectureModalOpen(false)} /> */}
+			{/* <LectureModal open={lectureModalOpen} onFinish={handleAddLecture} onCancel={() => setLectureModalOpen(false)} /> */}
 		</>
 	)
 }

@@ -1,0 +1,9 @@
+.table {
+  width: 100%;
+	border-radius: 14px;
+	overflow: hidden;
+}
+
+.table th::before {
+	display: none;
+}

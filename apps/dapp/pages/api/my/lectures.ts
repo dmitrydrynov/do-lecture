@@ -13,7 +13,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 
 		const response: any[] = []
 		let meta = {}
-		let lectures = await getPaidLecturesByUser(req.session.user.id, ['published', 'draft'])
+		let lectures = await getPaidLecturesByUser(req.session.user.id, ['published', 'draft', 'closed'])
 
 		if (lectures?.length) {
 			for (const l of lectures) {

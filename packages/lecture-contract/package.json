@@ -5,9 +5,9 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "dev": "npm run build -- --watch",
+    "dev": "tsup --watch",
     "build": "tsup",
-    "build:contract": "blueprint build"
+    "prebuild": "blueprint build"
   },
   "devDependencies": {
     "@ton-community/blueprint": "^0.5.0",
@@ -29,6 +29,7 @@
     "@ton-community/blueprint": "^0.5.0",
     "@ton-community/sandbox": "^0.6.1",
     "@ton-community/test-utils": "^0.1.0",
-    "@tonconnect/sdk": "^2.1.0"
+    "@tonconnect/sdk": "^2.1.0",
+    "antd": "^5.3.2"
   }
 }

@@ -1,7 +1,8 @@
+import styles from './style.module.css'
 import { useContext, useEffect, useState } from 'react'
 import { HeartTwoTone } from '@ant-design/icons'
 import Icon from '@ant-design/icons'
-import { Button, InputNumber, List, message, Progress, Space, Table, Typography } from 'antd'
+import { Button, InputNumber, List, message, Modal, Progress, Space, Table, Typography } from 'antd'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address, toNano } from 'ton'
@@ -14,12 +15,23 @@ import { Lecture } from 'lecture-contract/wrappers/Lecture'
 import { sleep } from '@/services/ton/provider'
 import { UserRejectsError } from '@tonconnect/sdk'
 import { ColumnsType } from 'antd/es/table'
+import { ExclamationCircleFilled } from '@ant-design/icons'
+import dynamic from 'next/dynamic'
+import { saveLecture } from '@/services/airtable'
+
+const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
+
+const { confirm } = Modal
+const { Paragraph, Text } = Typography
 
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
+	const [shouldUpdate, setShouldUpdate] = useState(false)
+	const [lectureForEdit, setLectureForEdit] = useState<any>()
 	const { connector, provider, network, userWallet } = useContext(TonContext)
 	const [amount, setAmount] = useState<number>(0.01)
 	const [messageApi, contextHolder] = message.useMessage()
 	const { trigger: cancelLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/cancel', (url, { arg }) => fetcher([url, arg]))
+	const { trigger: deleteDraftLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/delete', (url, { arg }) => fetcher([url, arg]))
 	const {
 		data,
 		mutate: refetchLectures,
@@ -29,9 +41,11 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	})
 
 	useEffect(() => {
-		if (forceUpdate) {
-			refetchLectures().then(() => onUpdate())
-		}
+		refetchLectures().then(() => onUpdate())
+	}, [shouldUpdate])
+
+	useEffect(() => {
+		if (forceUpdate) setShouldUpdate((u) => !u)
 	}, [forceUpdate])
 
 	const calculateProgress = (lecture: any) => {
@@ -82,9 +96,11 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 				attempt++
 			}
 
+			await cancelLecture({ id: lecture.id })
+
 			messageApi.open({
 				type: 'success',
-				content: 'Lecture was published',
+				content: 'Lecture was canceled',
 				key: 'cancelLectureProcessing',
 			})
 		} catch (e: any) {
@@ -110,6 +126,53 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		}
 	}
 
+	const showDeleteConfirm = (record: any) => {
+		confirm({
+			type: 'error',
+			title: 'Delete',
+			content: `Are you sure delete "${record.title}" lecture?`,
+			// icon: <ExclamationCircleFilled />,
+			okText: 'Yes',
+			okType: 'danger',
+			cancelText: 'No',
+			async onOk() {
+				await deleteDraftLecture({ id: record.id })
+				messageApi.success(`Lecture "${record.title}" was deleted`)
+				setShouldUpdate((u) => !u)
+			},
+		})
+	}
+
+	const showCancelConfirm = (record: any) => {
+		confirm({
+			type: 'warning',
+			title: 'Cancel',
+			content: (
+				<>
+					<Paragraph>Are you sure cancel "{record.title}" lecture?</Paragraph>
+					<Paragraph>Lecture cancellation is paid, it costs 0.1 TON.</Paragraph>
+					<Paragraph>If you agree and ready please press Yes button and approve the transaction in your TON wallet</Paragraph>
+				</>
+			),
+			// icon: <ExclamationCircleFilled />,
+			okText: 'Yes',
+			okType: 'danger',
+			cancelText: 'No',
+			async onOk() {
+				await handleCancelLecture(record)
+				setShouldUpdate((u) => !u)
+			},
+		})
+	}
+
+	const handleSaveLecture = async () => {
+		setLectureForEdit(undefined)
+	}
+
+	const handleDirectToTonScan = (contractAddress: string) => {
+		window.open(`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${contractAddress}`, '_blank')
+	}
+
 	const columns: ColumnsType<any> = [
 		{
 			title: 'Date',
@@ -117,7 +180,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 			key: 'name',
 			render: (date) => {
 				const isCurrentYear = dayjs(date).year() == dayjs().year()
-				return isCurrentYear ? dayjs(date).format('D MMM [at] hh:mm') : dayjs(date).format('D MMM YYYY [at] hh:mm')
+				return isCurrentYear ? dayjs(date).format('D MMM [at] HH:mm') : dayjs(date).format('D MMM YYYY [at] hh:mm')
 			},
 		},
 		{
@@ -139,12 +202,26 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		},
 		{
 			key: 'actions',
-			render: (record) => {
+			align: 'right',
+			render: (_, record) => {
 				return (
 					<Space>
-						<Button>Public</Button>
-						<Button>Edit</Button>
-						<Button>Delete</Button>
+						{!!record.contractAddress && (
+							<Button type="text" shape="circle" onClick={() => handleDirectToTonScan(record.contractAddress)}>
+								<Icon component={TonScanSvg} style={{ margin: 0, scale: '1.5', color: '#aaa' }} />
+							</Button>
+						)}
+						{record.meta.state == 'active' && (
+							<>
+								<Button onClick={() => showCancelConfirm(record)}>Cancel</Button>
+							</>
+						)}
+						{record.meta.state == undefined && record.status == 'draft' && (
+							<>
+								<Button onClick={() => setLectureForEdit(record)}>Edit</Button>
+								<Button onClick={() => showDeleteConfirm(record)}>Delete</Button>
+							</>
+						)}
 					</Space>
 				)
 			},
@@ -154,7 +231,9 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	return (
 		<>
 			{contextHolder}
-			<Table dataSource={data} columns={columns} pagination={false} />
+			<Table className={styles.table} dataSource={data} columns={columns} pagination={false} loading={isLoading} />
+
+			<LectureModal open={!!lectureForEdit} lectureId={lectureForEdit?.id} onFinish={handleSaveLecture} onCancel={() => setLectureForEdit(undefined)} />
 			{/* <List
 				loading={isLoading}
 				bordered

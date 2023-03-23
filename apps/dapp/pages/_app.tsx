@@ -1,7 +1,7 @@
 import '@/styles/globals.css'
 import { TonConnectError } from '@tonconnect/sdk'
 import { ConfigProvider } from 'antd'
-import { appTheme } from 'config/theme'
+import { defaultTheme } from 'config/theme'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { SettingsContext, useSettingsContext } from '@/contexts/settings'
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 	const settingsContext = useSettingsContext()
 
 	return (
-		<ConfigProvider theme={appTheme}>
+		<ConfigProvider theme={defaultTheme}>
 			<SettingsContext.Provider value={settingsContext}>
 				<TonContext.Provider value={tonContext}>{getLayout(<Component {...pageProps} />)}</TonContext.Provider>
 			</SettingsContext.Provider>

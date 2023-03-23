@@ -5,17 +5,18 @@ import Head from 'next/head'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { MyLectures } from '@/components/MyLectures'
 import { TonContext } from '@/services/ton/context'
+import { HiPlusSm } from 'react-icons/hi'
 import styles from '@/styles/Home.module.css'
 
-const AddLectureModal = dynamic(() => import('@/components/modals/AddLectureModal').then((r) => r.AddLectureModal), { ssr: false })
+const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 
 const MyLecturesPage = ({ user }: any) => {
 	const { connector } = useContext(TonContext)
-	const [addLectureModalOpen, setAddLectureModalOpen] = useState(false)
+	const [lectureModalOpen, setLectureModalOpen] = useState(false)
 	const [lectureAdded, setLectureAdded] = useState(false)
 
 	const handleAddLecture = () => {
-		setAddLectureModalOpen(false)
+		setLectureModalOpen(false)
 		setLectureAdded(true)
 	}
 
@@ -31,11 +32,16 @@ const MyLecturesPage = ({ user }: any) => {
 				{connector?.connected && (
 					<>
 						<Space direction="vertical" size="large" style={{ width: '100%' }}>
-							<Button type="primary" onClick={() => setAddLectureModalOpen(true)}>Создать платную лекцию</Button>
+							<Button type="primary" onClick={() => setLectureModalOpen(true)}>
+								<Space align="center">
+									<HiPlusSm style={{ display: 'block' }} />
+									Create
+								</Space>
+							</Button>
 							<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
 						</Space>
 
-						<AddLectureModal open={addLectureModalOpen} onFinish={handleAddLecture} onCancel={() => setAddLectureModalOpen(false)} />
+						<LectureModal open={lectureModalOpen} onFinish={handleAddLecture} onCancel={() => setLectureModalOpen(false)} />
 					</>
 				)}
 			</main>

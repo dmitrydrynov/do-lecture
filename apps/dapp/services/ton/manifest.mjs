@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import * as dotenv from 'dotenv'
+import { exit } from 'process'
 
 dotenv.config()
 
@@ -21,4 +22,7 @@ const main = async () => {
 	fs.writeFileSync(filePath, JSON.stringify(manifest, null, 2))
 }
 
-main().then(() => console.log('Ton connect manifest was generated.'))
+main().then(() => {
+	console.log('Ton connect manifest was generated.')
+	exit(0)
+})

@@ -9,27 +9,31 @@ const AirtableService = new Airtable({
 
 export default AirtableService
 
-export const createLecture = async ({ title, description, lecturerId, date, contractAddress, duration, status, price, stage, community }: any) => {
+export const saveLecture = async (data: any) => {
 	try {
-		const newLecture = await AirtableService('Lecture').create({
-			title,
-			description,
-			date,
-			contractAddress,
-			duration,
-			status,
-			stage,
-			price,
-			lecturer: [lecturerId],
-			community: [community],
-		})
+		const { id, lecturerId, community, ...args } = data
+		let lecture: any
 
-		if (!newLecture) return
+		if (id) {
+			lecture = await AirtableService('Lecture').update(id, {
+				...args,
+				lecturer: [lecturerId],
+				community: [community],
+			})
+		} else {
+			lecture = await AirtableService('Lecture').create({
+				...args,
+				lecturer: [lecturerId],
+				community: [community],
+			})
+		}
 
-		return { ...newLecture.fields, id: newLecture.id }
+		if (!lecture) throw Error('The data not recorded in database')
+
+		return { id: lecture.id, ...lecture.fields }
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		return null
+		throw error
 	}
 }
 
@@ -37,11 +41,31 @@ export const cancelLecture = async (id: string) => {
 	try {
 		await AirtableService('Lecture').update(id, {
 			status: 'closed',
+			stage: 'canceled',
 			closedAt: dayjs().toISOString(),
 		})
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		return null
+		throw error
+	}
+}
+
+export const deleteDraftLecture = async (id: string) => {
+	try {
+		const [lecture] = await AirtableService('Lecture')
+			.select({
+				filterByFormula: `AND(RECORD_ID() = "${id}", status = "draft")`,
+			})
+			.all()
+
+		if (lecture) {
+			await AirtableService('Lecture').destroy(lecture.id)
+		} else {
+			throw Error('Lecture did not find or is not draft')
+		}
+	} catch (error: any) {
+		console.error('[AIRTABLE ERROR]', error)
+		throw error
 	}
 }
 
@@ -73,7 +97,7 @@ export const getFundingPaidLectures = async () => {
 		return list.map((l: any) => parseAirtableRecord(l))
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		return null
+		throw error
 	}
 }
 
@@ -89,7 +113,7 @@ export const getRunupPaidLectures = async () => {
 		return list.map((l: any) => parseAirtableRecord(l))
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		return null
+		throw error
 	}
 }
 
