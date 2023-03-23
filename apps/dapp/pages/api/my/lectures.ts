@@ -1,11 +1,9 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { defaultCookie } from 'config/cookie'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 import { getPaidLecturesByUser } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton/provider'
-import dayjs from 'dayjs'
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {

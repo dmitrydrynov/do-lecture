@@ -4,8 +4,7 @@ export const fetcher = ([url, data]: any, changeData?: (data: any) => any) =>
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	}).then(async (res) => {
-
-		if(!res.ok && res.statusText) throw Error(res.statusText)
+		if (!res.ok && res.statusText) throw Error(res.statusText)
 
 		let data = await res.json()
 

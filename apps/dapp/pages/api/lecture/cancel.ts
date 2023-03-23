@@ -1,5 +1,5 @@
-import { cancelLecture } from '@/services/airtable'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { cancelLecture } from '@/services/airtable'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {

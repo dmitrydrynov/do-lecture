@@ -1,6 +1,4 @@
-import Airtable, { FieldSet, Record as AirtableRecord, Records as AirtableRecords } from 'airtable'
-import { Attachment } from 'airtable/lib/attachment'
-import { Collaborator } from 'airtable/lib/collaborator'
+import Airtable, { FieldSet, Record as AirtableRecord } from 'airtable'
 import dayjs from 'dayjs'
 
 const AirtableService = new Airtable({

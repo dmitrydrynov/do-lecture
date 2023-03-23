@@ -12,31 +12,8 @@ import {
 	WalletNotConnectedError,
 	LocalstorageNotFoundError,
 } from '@tonconnect/sdk'
-import { Base64 } from '@tonconnect/protocol'
-import {
-	Address,
-	beginCell,
-	Cell,
-	Contract,
-	ContractGetMethodResult,
-	ContractProvider,
-	ContractState,
-	internal,
-	MessageRelaxed,
-	OpenedContract,
-	Sender,
-	SenderArguments,
-	SendMode,
-	StateInit,
-	storeStateInit,
-	toNano,
-	TonClient,
-	TupleItem,
-	WalletContractV4,
-} from 'ton'
-import { KeyPair, mnemonicToPrivateKey } from 'ton-crypto'
-import { Maybe } from 'ton/dist/utils/maybe'
 import { wrapper } from 'lecture-contract'
+import { Address, beginCell, Cell, Contract, Sender, SenderArguments, StateInit, storeStateInit, TonClient } from 'ton'
 
 const { Lecture } = wrapper
 

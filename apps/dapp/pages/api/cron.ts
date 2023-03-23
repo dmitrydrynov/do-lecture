@@ -1,8 +1,8 @@
-import AirtableService, { cancelLecture } from '@/services/airtable'
-import { initLectureContract } from '@/services/ton/provider'
 import dayjs from 'dayjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
+import AirtableService, { cancelLecture } from '@/services/airtable'
+import { initLectureContract } from '@/services/ton/provider'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method === 'POST') {
