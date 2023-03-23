@@ -24,6 +24,7 @@
         "^build"
       ],
       "outputs": [
+        "build/**",
         "dist/**",
         ".next/**"
       ]
