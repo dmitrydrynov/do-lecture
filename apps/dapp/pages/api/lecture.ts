@@ -25,13 +25,13 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 			}
 
 			const meta = await contract.getData()
-			const stage = await contract.getStage()
+			// const stage = await contract.getStage()
 
 			response = {
 				...lecture,
 				meta: {
 					...meta,
-					stage,
+					// stage,
 				},
 			}
 		} else {
