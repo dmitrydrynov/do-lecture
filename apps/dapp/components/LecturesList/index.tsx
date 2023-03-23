@@ -1,3 +1,4 @@
+import { fetcher } from '@/helpers/fetcher'
 import { Progress, Table, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
@@ -5,7 +6,6 @@ import { HiOutlineChevronRight } from 'react-icons/hi'
 import useSWR from 'swr'
 import { fromNano } from 'ton'
 import styles from './style.module.css'
-import { fetcher } from '@/helpers/fetcher'
 
 const { Text } = Typography
 

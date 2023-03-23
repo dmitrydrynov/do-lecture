@@ -1,11 +1,11 @@
 import '@/styles/globals.css'
-import { TonConnectError } from '@tonconnect/sdk'
-import { ConfigProvider } from 'antd'
-import { defaultTheme } from 'config/theme'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import { SettingsContext, useSettingsContext } from '@/contexts/settings'
 import { TonContext, useTonContext } from '@/services/ton/context'
+import { defaultTheme } from 'config/theme'
+import { TonConnectError } from '@tonconnect/sdk'
+import { ConfigProvider } from 'antd'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
 

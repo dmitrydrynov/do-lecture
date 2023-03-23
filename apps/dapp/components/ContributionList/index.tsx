@@ -1,9 +1,9 @@
+import { fetcher } from '@/helpers/fetcher'
 import { Table, Typography } from 'antd'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
 import { fromNano } from 'ton'
 import styles from './style.module.css'
-import { fetcher } from '@/helpers/fetcher'
 
 const { Text } = Typography
 

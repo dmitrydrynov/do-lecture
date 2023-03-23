@@ -1,12 +1,12 @@
 import { ReactNode, useContext, useState } from 'react'
-import { Button, Space } from 'antd'
-import dynamic from 'next/dynamic'
-import Head from 'next/head'
-import { HiPlusSm } from 'react-icons/hi'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { MyLectures } from '@/components/MyLectures'
 import { TonContext } from '@/services/ton/context'
 import styles from '@/styles/Home.module.css'
+import { Button, Space } from 'antd'
+import dynamic from 'next/dynamic'
+import Head from 'next/head'
+import { HiPlusSm } from 'react-icons/hi'
 
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 

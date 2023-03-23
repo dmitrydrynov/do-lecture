@@ -1,7 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { Address } from 'ton'
 import AirtableService from '@/services/airtable'
 import { getLectureData } from '@/services/ton/provider'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { Address } from 'ton'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {

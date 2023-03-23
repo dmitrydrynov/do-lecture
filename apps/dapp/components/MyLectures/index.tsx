@@ -1,5 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 import { useContext, useEffect, useState } from 'react'
+import { fetcher } from '@/helpers/fetcher'
+import { TonContext } from '@/services/ton/context'
+import { sleep } from '@/services/ton/provider'
 import Icon from '@ant-design/icons'
 import { Button, message, Modal, Space, Table, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
@@ -11,9 +14,6 @@ import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address, toNano } from 'ton'
 import styles from './style.module.css'
 import { TonScanSvg } from '../icons/TonScanSvg'
-import { fetcher } from '@/helpers/fetcher'
-import { TonContext } from '@/services/ton/context'
-import { sleep } from '@/services/ton/provider'
 
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 

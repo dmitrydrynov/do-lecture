@@ -1,9 +1,9 @@
 import { useContext } from 'react'
+import { TonContext } from '@/services/ton/context'
 import { Button, Row, Layout, Col, Space, Tag } from 'antd'
 import Link from 'next/link'
 import styles from './style.module.css'
 import { AuthButton } from '../AuthButton'
-import { TonContext } from '@/services/ton/context'
 
 const { Header } = Layout
 

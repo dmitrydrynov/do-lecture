@@ -1,7 +1,7 @@
+import { saveLecture } from '@/services/airtable'
 import { defaultCookie } from 'config/cookie'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveLecture } from '@/services/airtable'
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
