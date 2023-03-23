@@ -1,3 +1,4 @@
+// @ts-ignore
 import { CryptoPay } from '@foile/crypto-pay-api'
 import { NextApiRequest, NextApiResponse } from 'next'
 
