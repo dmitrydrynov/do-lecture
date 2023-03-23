@@ -56,11 +56,11 @@ export const initLectureContract = async (address: Address) => {
 // 	return { contract, keyPair }
 // }
 
-// export const getLectureData = async (lectureAddress: Address) => {
-// 	const lecture = await initLectureContract(lectureAddress)
+export const getLectureData = async (lectureAddress: Address) => {
+	const lecture = await initLectureContract(lectureAddress)
 
-// 	return await lecture?.getData()
-// }
+	return await lecture?.getData()
+}
 
 export class TonConnectProvider {
 	connector: TonConnect
