@@ -1,64 +1,96 @@
-import { ReactNode } from 'react'
+import { ReactNode, useContext, useMemo, useState } from 'react'
 import { ContributionList } from '@/components/ContributionList'
 import { AppCountdown } from '@/components/Countdown'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { getFetcher } from '@/helpers/fetcher'
 import { renderPrice } from '@/helpers/utils'
-import { Button, Col, List, Row, Space, Tag, Typography } from 'antd'
+import { Button, Col, List, Row, Space, Tag, Typography, message } from 'antd'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
 import styles from './style.module.css'
+import { Address, fromNano, toNano } from 'ton'
+import { TonContext } from '@/services/ton/context'
+import { wrapper } from 'lecture-contract'
+import { BackThisLecture } from '@/components/modals/BackThisLecture'
+import lecture from '../api/lecture'
 
 const { Text, Paragraph, Title } = Typography
+const { Lecture } = wrapper
 
 const LecturePage = () => {
+	const { provider } = useContext(TonContext)
 	const router = useRouter()
+	const [isOpenBackThisLecture, setIsOpenBackThisLecture] = useState(false)
+	const [messageApi, contextHolder] = message.useMessage()
 	const { id } = router.query
 	const { data, isLoading } = useSWR(['/api/lecture', { id }], getFetcher, {
 		refreshInterval: 10000,
 	})
 
-	const detailsData = [
-		{
-			label: 'Stage',
-			value: (
-				<Tag color="success" style={{ marginRight: 0 }}>
-					On {data?.stage}
-				</Tag>
-			),
-		},
-		{
-			label: 'Funding amount',
-			value: renderPrice(data?.meta?.goal),
-		},
-		{
-			label: 'Minimum contribution',
-			value: renderPrice(100000000),
-		},
-	]
+	const detailsData = useMemo(() => {
+		if (!data) return
+
+		return [
+			{
+				label: 'Stage',
+				value: (
+					<Tag color="success" style={{ marginRight: 0 }}>
+						{data.stage}
+					</Tag>
+				),
+			},
+			{
+				label: 'Backers',
+				value: data.meta.paymentCount,
+			},
+			{
+				label: 'Goal',
+				value: renderPrice(fromNano(data.meta.goal)),
+			},
+			{
+				label: 'Minimum contribution',
+				value: renderPrice(fromNano(100000000)),
+			},
+		]
+	}, [data])
+
+	const handleBackThisLecture = async (amount: number) => {
+		if (!provider || !data) return
+
+		try {
+			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(data.contractAddress)))
+			await lectureContract.sendPay(provider.sender(), toNano(amount.toString()))
+		} catch (e: any) {
+			messageApi.error(e.message || 'Оплата лекции не прошла')
+			console.error(e)
+		}
+	}
 
 	if (!data && isLoading) {
 		return <>Loading...</>
 	}
 
-	if (data.error) {
+	if (data?.error) {
 		return <>Error: {data.error}</>
 	}
 
 	return (
 		<>
+			{contextHolder}
 			<Typography>
-				<Text type="secondary">{data.communityName}</Text>
-				<br />
-				<Title>{data.title}</Title>
-				<Paragraph>
-					<Text>Date: {dayjs(data.date).format('DD/MM/YYYY')}</Text>
+				<Title style={{ marginBottom: 0 }}>{data.title}</Title>
+				<Text type="secondary" style={{ fontSize: '18px' }}>
+					The lecture for {data.communityName}
+				</Text>
+				<Paragraph style={{ marginTop: 16 }}>
+					<Text>Date: {dayjs(data.date).format('D MMM [at] hh:mm a')}</Text>
 					<br />
 					<Text type="secondary">Duration is about {data.duration} minutes</Text>
 				</Paragraph>
 				<Paragraph>{data.description}</Paragraph>
 			</Typography>
+
 			<Row gutter={[64, 64]} wrap style={{ marginTop: 64 }}>
 				<Col span={12}>
 					<List
@@ -77,13 +109,13 @@ const LecturePage = () => {
 					<Row gutter={[64, 64]} wrap style={{ marginTop: 24 }}>
 						<Col flex={1}>
 							<Space>
-								<Button type="primary" size="large" onClick={() => {}}>
-									Fund the lecture
+								<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
+									Back this lecture
 								</Button>
 							</Space>
 						</Col>
 						<Col>
-							<AppCountdown date={data.date} />
+							<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
 						</Col>
 					</Row>
 				</Col>
@@ -93,9 +125,11 @@ const LecturePage = () => {
 			{data.meta.paymentCount > 0 && (
 				<Typography style={{ marginTop: 64 }}>
 					<Title level={4}>Contribution history</Title>
-					<ContributionList />
+					<ContributionList lectureId={id} />
 				</Typography>
 			)}
+
+			<BackThisLecture open={isOpenBackThisLecture} onCancel={() => setIsOpenBackThisLecture(false)} onFinish={handleBackThisLecture} />
 		</>
 	)
 }

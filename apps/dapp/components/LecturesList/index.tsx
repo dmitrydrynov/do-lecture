@@ -41,11 +41,11 @@ export const LecturesList = () => {
 			render: (title: string, data: any) => {
 				return (
 					<>
+						<Text>{title}</Text>
+						<br />
 						<Text type="secondary">
 							<small>{data.communityName}</small>
 						</Text>
-						<br />
-						<Text>{title}</Text>
 					</>
 				)
 			},
@@ -96,7 +96,7 @@ export const LecturesList = () => {
 					}
 				}}
 				loading={isLoading}
-				dataSource={data}
+				dataSource={data?.map((r: any) => ({ key: r.id, ...r }))}
 				columns={columns}
 				pagination={false}
 			/>

@@ -136,6 +136,12 @@ export const findUserByHash = async ({ hash }: any) => {
 	return user ? parseAirtableRecord(user) : null
 }
 
+export const getLectureContractAddress = async (id: string) => {
+	const lecture = await AirtableService('Lecture').find(id)
+
+	return lecture.get('contractAddress') as string
+}
+
 export const getLecture = async (id: string) => {
 	const lecture = await AirtableService('Lecture').find(id)
 

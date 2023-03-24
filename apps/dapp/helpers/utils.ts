@@ -26,5 +26,5 @@ export const renderPrice = (price: string | number, style: 'currency' | 'decimal
 	return new Intl.NumberFormat('ru', {
 		style,
 		currency: 'TON',
-	}).format(Number.parseFloat(fromNano(price)))
+	}).format(Number.parseFloat(price.toString()))
 }

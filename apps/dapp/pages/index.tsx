@@ -30,8 +30,8 @@ const Home = ({ user }: any) => {
 			</Head>
 			<main className={styles.main}>
 				<div className={styles.mainIntro}>
-					<Title>Do or fund lectures</Title>
-					<Text type="secondary">Share lectures for everyone. This is a platform where you can find funding for interesting lectures</Text>
+					<Title>Decentralized crowdfunding for lectures</Title>
+					<Text type="secondary">Share knowledge with your community. This is a platform where you can find funding for interesting lectures</Text>
 				</div>
 				<LecturesList />
 			</main>

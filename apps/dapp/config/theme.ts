@@ -77,5 +77,9 @@ export const defaultTheme: ThemeConfig = {
 		Select: {
 			controlItemBgActive: '#203c38',
 		},
+		Segmented: {
+			colorBgLayout: '#2e343b',
+			colorBgElevated: '#626c76',
+		},
 	},
 }

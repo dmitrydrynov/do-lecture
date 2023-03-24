@@ -4,7 +4,7 @@ import { fetcher } from '@/helpers/fetcher'
 import { TonContext } from '@/services/ton/context'
 import { sleep } from '@/services/ton/provider'
 import Icon from '@ant-design/icons'
-import { Button, message, Modal, Space, Table, Typography } from 'antd'
+import { Button, message, Modal, Segmented, Space, Table, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { Lecture } from 'lecture-contract/wrappers/Lecture'
@@ -14,6 +14,7 @@ import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address, toNano } from 'ton'
 import styles from './style.module.css'
 import { TonScanSvg } from '../icons/TonScanSvg'
+import { renderPrice } from '@/helpers/utils'
 
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 
@@ -23,6 +24,7 @@ const { Paragraph, Text } = Typography
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
 	const [shouldUpdate, setShouldUpdate] = useState(false)
 	const [lectureForEdit, setLectureForEdit] = useState<any>()
+	const [filterStatus, setFilterStatus] = useState<string>('all')
 	const { connector, provider, network, userWallet } = useContext(TonContext)
 	const [amount, setAmount] = useState<number>(0.01)
 	const [messageApi, contextHolder] = message.useMessage()
@@ -32,8 +34,8 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		data,
 		mutate: refetchLectures,
 		isLoading,
-	} = useSWR(connector?.connected ? ['/api/my/lectures'] : null, fetcher, {
-		refreshInterval: 10000,
+	} = useSWR(connector?.connected ? ['/api/my/lectures', { filterStatus }] : null, fetcher, {
+		refreshInterval: 10000, revalidateOnFocus: false,
 	})
 
 	useEffect(() => {
@@ -50,18 +52,6 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		const percent = (lecture.meta.goal - lecture.meta.left) / lecture.meta.goal
 
 		return Math.ceil(percent * 100)
-	}
-
-	const handlePayLecture = async (lecture: any) => {
-		if (!provider) return
-
-		try {
-			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(lecture.contractAddress)))
-			await lectureContract.sendPay(provider.sender(), toNano(amount))
-		} catch (e: any) {
-			message.error(e.message || 'Оплата лекции не прошла')
-			console.error(e)
-		}
 	}
 
 	const handleCancelLecture = async (lecture: any) => {
@@ -125,6 +115,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	const showDeleteConfirm = (record: any) => {
 		confirm({
 			type: 'error',
+
 			title: 'Delete',
 			content: `Are you sure delete "${record.title}" lecture?`,
 			// icon: <ExclamationCircleFilled />,
@@ -173,10 +164,11 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		{
 			title: 'Date',
 			dataIndex: 'date',
+			width: '160px',
 			key: 'name',
 			render: (date) => {
 				const isCurrentYear = dayjs(date).year() == dayjs().year()
-				return isCurrentYear ? dayjs(date).format('D MMM [at] HH:mm') : dayjs(date).format('D MMM YYYY [at] hh:mm')
+				return isCurrentYear ? dayjs(date).format('D MMM [at] hh:mm a') : dayjs(date).format('D MMM, YY [at] hh:mm a')
 			},
 		},
 		{
@@ -186,18 +178,22 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		},
 		{
 			title: 'Status',
+			width: '160px',
 			dataIndex: 'status',
 			key: 'status',
 			align: 'center',
 		},
 		{
-			title: 'Required amount, TON',
+			title: 'Required amount',
+			width: '200px',
 			dataIndex: 'price',
 			align: 'right',
 			key: 'price',
+			render: (price) => renderPrice(price),
 		},
 		{
 			key: 'actions',
+			width: '160px',
 			align: 'right',
 			render: (_, record) => {
 				return (
@@ -224,9 +220,26 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		},
 	]
 
+	const handleChangeFilterStatus = async (value: string | number) => {
+		setFilterStatus(value.toString())
+		// await refetchLectures()
+	}
+
 	return (
 		<>
 			{contextHolder}
+			<Segmented
+				value={filterStatus}
+				onChange={handleChangeFilterStatus}
+				defaultChecked={true}
+				options={[
+					{ label: 'All', value: 'all' },
+					{ label: 'Drafts', value: 'draft' },
+					{ label: 'Published', value: 'published' },
+					{ label: 'Closed', value: 'closed' },
+				]}
+				style={{ margin: '16px 0' }}
+			/>
 			<Table className={styles.table} dataSource={data} columns={columns} pagination={false} loading={isLoading} />
 
 			<LectureModal open={!!lectureForEdit} lectureId={lectureForEdit?.id} onFinish={handleSaveLecture} onCancel={() => setLectureForEdit(undefined)} />

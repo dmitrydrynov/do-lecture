@@ -76,7 +76,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 				Lecture.createFromConfig(
 					{
 						startTime: startTime.unix(),
-						goal: toNano(data.price),
+						goal: toNano(data.price.toString()),
 						serviceAddress: Address.parse(settings.serviceWallet),
 						managerAddress: Address.parse(community.managerAddress),
 						lecturerAddress: Address.parse(userWallet.account.address),

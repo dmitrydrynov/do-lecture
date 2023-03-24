@@ -9,9 +9,10 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 	try {
 		if (req.method !== 'POST' || !req.session?.user?.id) return res.status(503).end()
 
+		const { filterStatus } = req.body
 		const response: any[] = []
 		let meta = {}
-		let lectures = await getPaidLecturesByUser(req.session.user.id, ['published', 'draft', 'closed'])
+		let lectures = await getPaidLecturesByUser(req.session.user.id, filterStatus == 'all' ? ['published', 'draft'] : [filterStatus])
 
 		if (lectures?.length) {
 			for (const l of lectures) {

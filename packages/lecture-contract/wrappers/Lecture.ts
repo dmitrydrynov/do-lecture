@@ -267,7 +267,7 @@ export class Lecture implements Contract {
 
             const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
 
-            return payments;
+            return payments.values();
         } catch (e: any) {
             throw e;
         }
@@ -278,7 +278,7 @@ export class Lecture implements Contract {
             const result = await provider.get('get_payments', []);
             const payments = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), PaymentsDictValue);
 
-            return payments;
+            return payments.values();
         } catch (e: any) {
             throw e;
         }
@@ -289,7 +289,7 @@ export class Lecture implements Contract {
             const result = await provider.get('get_reports', []);
             const reports = result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(16), ReportsDictValue);
 
-            return reports;
+            return reports.values();
         } catch (e: any) {
             throw e;
         }
