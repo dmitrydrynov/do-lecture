@@ -12,22 +12,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const response: any[] = []
 		let lectures = await getFundingPaidLectures()
 
-		if (lectures) {
+		if (lectures.length > 0) {
 			for (const l of lectures) {
-				if (l.price && (l.price as number) > 0) {
+				if (l.price && l.price > 0) {
 					const address = Address.parse(l.contractAddress as string)
 					const contract = await initLectureContract(address)
 
 					if (!contract) continue
 
-					// const meta = await contract.getData()
-					// const stage = await contract.getStage()
+					const meta = await contract.getData()
 
 					response.push({
 						...l,
 						meta: {
-							// ...meta,
-							// stage,
+							...meta,
 						},
 					})
 				} else {

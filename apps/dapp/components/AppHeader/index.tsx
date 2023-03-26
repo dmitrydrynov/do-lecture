@@ -39,7 +39,7 @@ export const AppHeader = () => {
 							}}
 						/>
 					</Link>
-					{network == 'testnet' && <Tag color="blue">{network}</Tag>}
+					{(network == 'testnet' || process.env.NEXT_PUBLIC_IS_TESTNET == 'true') && <Tag color="blue">testnet</Tag>}
 				</Col>
 				<Col>
 					<Space>

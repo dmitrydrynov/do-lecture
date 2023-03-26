@@ -18,7 +18,7 @@ import { Address, beginCell, Cell, Contract, Sender, SenderArguments, StateInit,
 const { Lecture } = wrapper
 
 export const tonApi = () => {
-	const isTestnet = process.env.IS_TESTNET === 'true'
+	const isTestnet = process.env.NEXT_PUBLIC_IS_TESTNET == 'true'
 	const endpoint = isTestnet ? 'https://testnet.toncenter.com/api/v2/jsonRPC' : 'https://toncenter.com/api/v2/jsonRPC'
 
 	return new TonClient({

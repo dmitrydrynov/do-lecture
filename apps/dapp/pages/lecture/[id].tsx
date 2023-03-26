@@ -4,7 +4,7 @@ import { AppCountdown } from '@/components/Countdown'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { getFetcher } from '@/helpers/fetcher'
 import { renderPrice } from '@/helpers/utils'
-import { Button, Col, List, Row, Space, Tag, Typography, message } from 'antd'
+import { Button, Col, List, Row, Space, Tag, Typography, message, Progress } from 'antd'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
@@ -36,9 +36,12 @@ const LecturePage = () => {
 			{
 				label: 'Stage',
 				value: (
-					<Tag color="success" style={{ marginRight: 0 }}>
-						{data.stage}
-					</Tag>
+					<>
+						<Tag color="success" style={{ marginRight: 0 }}>
+							{data.stage}
+						</Tag>
+						<Progress showInfo={true} strokeWidth={16} percent={45} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} style={{ marginTop: 8 }} />
+					</>
 				),
 			},
 			{
@@ -123,39 +126,45 @@ const LecturePage = () => {
 					<br />
 					<Text type="secondary">Duration is about {data.duration} minutes</Text>
 				</Paragraph>
-				<Paragraph>{data.description}</Paragraph>
+
+				<Row gutter={[64, 16]} wrap style={{ marginTop: 32 }} justify="space-between">
+					<Col lg={{ span: 13 }} xs={{ span: 24 }}>
+						<Paragraph>{data.description}</Paragraph>
+					</Col>
+					<Col lg={{ offset: 1, span: 10 }} xs={{ span: 24 }}>
+						<Space direction="vertical" size="large" style={{ width: '100%' }}>
+							<List
+								className={styles.detailsList}
+								itemLayout="horizontal"
+								dataSource={detailsData}
+								renderItem={(item) => (
+									<List.Item>
+										<Row wrap justify="space-between" style={{ width: '100%' }}>
+											<Text>{item.label}</Text>
+											{item.value}
+										</Row>
+									</List.Item>
+								)}
+							/>
+							<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
+							<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)} style={{ marginTop: 16, display: 'flex', width: '100%' }}>
+								Back this lecture
+							</Button>
+						</Space>
+					</Col>
+				</Row>
 			</Typography>
 
-			<Row gutter={[64, 64]} wrap style={{ marginTop: 64 }}>
-				<Col md={{ span: 12 }} xs={{ span: 24 }}>
-					<List
-						className={styles.detailsList}
-						itemLayout="horizontal"
-						dataSource={detailsData}
-						renderItem={(item) => (
-							<List.Item>
-								<Row wrap justify="space-between" style={{ width: '100%' }}>
-									<Text>{item.label}</Text>
-									{item.value}
-								</Row>
-							</List.Item>
-						)}
-					/>
+			{/* <Row gutter={[64, 32]} wrap style={{ marginTop: 24 }} justify="space-between">
+				<Col xs={{ order: 1 }} md={{ order: 0 }}>
+					<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
+						Back this lecture
+					</Button>
 				</Col>
-				<Col md={{ span: 12 }} xs={{ span: 24 }}></Col>
-			</Row>
-			<Row gutter={[64, 64]} wrap style={{ marginTop: 24 }}>
-				<Col flex={1}>
-					<Space>
-						<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
-							Back this lecture
-						</Button>
-					</Space>
-				</Col>
-				<Col>
+				<Col xs={{ order: 0 }} md={{ order: 1 }}>
 					<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
 				</Col>
-			</Row>
+			</Row> */}
 
 			{data.meta.paymentCount > 0 && (
 				<Typography style={{ marginTop: 64 }}>

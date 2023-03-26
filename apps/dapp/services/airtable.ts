@@ -86,9 +86,9 @@ export const getFundingPaidLectures = async () => {
 	try {
 		const list = await AirtableService('Lecture')
 			.select({
-				filterByFormula: `AND(status = "published", DATETIME_DIFF(date, "${dayjs().toISOString()}", 'hours') > 2)`,
-				maxRecords: 200,
-				sort: [{ field: 'date', direction: 'asc' }],
+				// filterByFormula: `AND(status = "published", DATETIME_DIFF(date, "${dayjs().toISOString()}", 'hours') > 2)`,
+				// maxRecords: 200,
+				// sort: [{ field: 'date', direction: 'asc' }],
 			})
 			.all()
 

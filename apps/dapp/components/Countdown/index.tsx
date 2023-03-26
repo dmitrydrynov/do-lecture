@@ -13,7 +13,7 @@ export const AppCountdown = ({ date }: { date: string }) => {
 		return (
 			<Space size="large">
 				<Text type="secondary">Ends in</Text>
-				<Row justify="space-between">
+				<Row justify="end">
 					<div className={styles.countdownText}>{days} days</div>
 					<div className={styles.countdownDots}></div>
 					<div className={styles.countdownTime}>

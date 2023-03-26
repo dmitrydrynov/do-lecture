@@ -2,10 +2,12 @@
 	background-color: #212a33;
 	padding: 8px 12px;
 	border-radius: 8px;
+	white-space: nowrap;
 }
 
 .countdownTime {
 	padding: 8px 12px;
+	white-space: nowrap;
 }
 
 .countdownTime {

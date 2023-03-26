@@ -31,9 +31,11 @@ export const LecturesList = () => {
 			{
 				key: '1',
 				dataIndex: 'title',
-				title: 'Title',
-				width: '40%',
+				title: 'Lectures',
+				width: screens.xs ? '100%' : '40%',
 				render: (title: string, data: any) => {
+					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
+
 					return (
 						<>
 							<Text>{title}</Text>
@@ -41,6 +43,8 @@ export const LecturesList = () => {
 							<Text type="secondary">
 								<small>{data.communityName}</small>
 							</Text>
+							<br />
+							<Text type="secondary">Funding ends in {parsedDate}</Text>
 						</>
 					)
 				},
@@ -49,14 +53,15 @@ export const LecturesList = () => {
 				key: '2',
 				dataIndex: 'price',
 				title: 'Funding',
+				responsive: ['md'],
 				render: (price: number, lecture: any) => {
-					return <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+					return screens.md ? <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} /> : calculateProgress(lecture) + '%'
 				},
 			},
 			{
 				key: '3',
 				dataIndex: 'date',
-				// responsive: ['md'],
+				responsive: ['md'],
 				width: '200px',
 				title: 'Funding ends in',
 				render: (date: string) => {

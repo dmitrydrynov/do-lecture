@@ -1,5 +1,5 @@
 import { fetcher } from '@/helpers/fetcher'
-import { Table, Typography } from 'antd'
+import { Grid, Table, Typography } from 'antd'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
 import { fromNano } from 'ton'
@@ -14,7 +14,7 @@ import { TonContext } from '@/services/ton/context'
 const { Text } = Typography
 
 export const ContributionList = ({ lectureId }: any) => {
-	const route = useRouter()
+	const sceens = Grid.useBreakpoint()
 	const { network } = useContext(TonContext)
 	const { data, isLoading } = useSWR(['/api/lecture/payments', { lectureId }], fetcher, {
 		refreshInterval: 10000,
@@ -26,7 +26,7 @@ export const ContributionList = ({ lectureId }: any) => {
 			dataIndex: 'value',
 			title: 'Amount',
 			render: (value: number) => (
-				<Text>
+				<Text style={{whiteSpace: 'nowrap'}}>
 					<TonCoinSvg /> {renderPrice(fromNano(value), 'decimal')}
 				</Text>
 			),
@@ -44,7 +44,7 @@ export const ContributionList = ({ lectureId }: any) => {
 			render: (address: string) => (
 				<Text ellipsis={true}>
 					<Link href={`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${address}`} target="_blank">
-						{sliceAddress(address)}
+						{sliceAddress(address, sceens.md ? 16 : 3)}
 					</Link>
 				</Text>
 			),
