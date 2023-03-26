@@ -63,6 +63,7 @@ export const defaultTheme: ThemeConfig = {
 			colorLink: '#25d9b3',
 			colorLinkActive: '#25d9b3',
 			colorLinkHover: '#25d9b3',
+			colorTextHeading: 'rgba(255,255,255,0.4)'
 		},
 		Button: {
 			colorLink: '#25d9b3',

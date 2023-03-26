@@ -5,14 +5,12 @@ import { useSlicedAddress } from '@/hooks/useSlicedAddress'
 import { TonContext } from '@/services/ton/context'
 import { DownOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Modal, Row, Space, Typography } from 'antd'
-import { useRouter } from 'next/router'
 import { QRCode } from 'react-qrcode-logo'
 import styles from './style.module.css'
 
 const { Text, Paragraph } = Typography
 
-export const AuthButton = () => {
-	const router = useRouter()
+export const AuthButton = ({ onChange = () => {} }: any) => {
 	const { connector, availableWallets, userWallet, network } = useContext(TonContext)
 	const [selectWalletModal, setSelectWalletModal] = useState(false)
 	const [universalLink, setUniversalLink] = useState('')
@@ -38,7 +36,7 @@ export const AuthButton = () => {
 
 		if (wallet?.injected) {
 			connector.connect({ jsBridgeKey: wallet.jsBridgeKey })
-
+			onChange()
 			return
 		}
 
@@ -53,14 +51,16 @@ export const AuthButton = () => {
 			} else {
 				setUniversalLink(universalLink)
 			}
+
+			onChange()
 		}
 	}
 
 	const handleDisconnect = async () => {
 		if (connector?.connected) {
 			await fetch('/api/auth/logout')
+			onChange()
 			await connector.disconnect()
-			await router.push('/')
 		}
 	}
 

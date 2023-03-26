@@ -1,0 +1,17 @@
+.walletImage {
+  border-radius: 16px;
+}
+
+.walletButton {
+  padding: 16px;
+  border: 2px solid transparent;
+}
+
+.walletsModal {
+  width: 100px;
+}
+
+.selectedWallet {
+  /* border: 2px solid rgb(212, 212, 212); */
+  background-color: #121212;
+}

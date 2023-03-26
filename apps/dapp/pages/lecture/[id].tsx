@@ -13,15 +13,16 @@ import { Address, fromNano, toNano } from 'ton'
 import { TonContext } from '@/services/ton/context'
 import { wrapper } from 'lecture-contract'
 import { BackThisLecture } from '@/components/modals/BackThisLecture'
-import lecture from '../api/lecture'
+import { sleep } from '@/services/ton/provider'
 
 const { Text, Paragraph, Title } = Typography
 const { Lecture } = wrapper
 
 const LecturePage = () => {
-	const { provider } = useContext(TonContext)
+	const { provider, userWallet } = useContext(TonContext)
 	const router = useRouter()
 	const [isOpenBackThisLecture, setIsOpenBackThisLecture] = useState(false)
+	const [paymentProcessing, setPaymentProcessing] = useState(false)
 	const [messageApi, contextHolder] = message.useMessage()
 	const { id } = router.query
 	const { data, isLoading } = useSWR(['/api/lecture', { id }], getFetcher, {
@@ -56,15 +57,49 @@ const LecturePage = () => {
 	}, [data])
 
 	const handleBackThisLecture = async (amount: number) => {
-		if (!provider || !data) return
+		if (!provider || !data || !userWallet) return
+
+		setPaymentProcessing(true)
+		messageApi.open({
+			type: 'loading',
+			content: 'Waiting...',
+			duration: 0,
+			key: 'paymentProcess',
+		})
 
 		try {
 			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(data.contractAddress)))
 			await lectureContract.sendPay(provider.sender(), toNano(amount.toString()))
+
+			console.log()
+
+			let attempt = 0
+			const userPayments = await lectureContract.getPaymentsByUser(Address.parse(userWallet.account.address))
+			let newLength = userPayments?.length
+			while (userPayments?.length == newLength && attempt < 30) {
+				await sleep(2000)
+
+				const _userPayments = await lectureContract.getPaymentsByUser(Address.parse(userWallet.account.address))
+				newLength = _userPayments?.length
+				attempt++
+			}
+
+			setIsOpenBackThisLecture(false)
+			messageApi.open({
+				type: 'success',
+				content: 'Successful',
+				key: 'paymentProcess',
+			})
 		} catch (e: any) {
-			messageApi.error(e.message || 'Оплата лекции не прошла')
+			messageApi.open({
+				type: 'error',
+				content: e.message || 'Something wrong. Try again later',
+				key: 'paymentProcess',
+			})
 			console.error(e)
 		}
+
+		setPaymentProcessing(false)
 	}
 
 	if (!data && isLoading) {
@@ -92,7 +127,7 @@ const LecturePage = () => {
 			</Typography>
 
 			<Row gutter={[64, 64]} wrap style={{ marginTop: 64 }}>
-				<Col span={12}>
+				<Col md={{ span: 12 }} xs={{ span: 24 }}>
 					<List
 						className={styles.detailsList}
 						itemLayout="horizontal"
@@ -106,20 +141,20 @@ const LecturePage = () => {
 							</List.Item>
 						)}
 					/>
-					<Row gutter={[64, 64]} wrap style={{ marginTop: 24 }}>
-						<Col flex={1}>
-							<Space>
-								<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
-									Back this lecture
-								</Button>
-							</Space>
-						</Col>
-						<Col>
-							<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
-						</Col>
-					</Row>
 				</Col>
-				<Col span={12}></Col>
+				<Col md={{ span: 12 }} xs={{ span: 24 }}></Col>
+			</Row>
+			<Row gutter={[64, 64]} wrap style={{ marginTop: 24 }}>
+				<Col flex={1}>
+					<Space>
+						<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
+							Back this lecture
+						</Button>
+					</Space>
+				</Col>
+				<Col>
+					<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
+				</Col>
 			</Row>
 
 			{data.meta.paymentCount > 0 && (
@@ -129,7 +164,7 @@ const LecturePage = () => {
 				</Typography>
 			)}
 
-			<BackThisLecture open={isOpenBackThisLecture} onCancel={() => setIsOpenBackThisLecture(false)} onFinish={handleBackThisLecture} />
+			<BackThisLecture open={isOpenBackThisLecture} wait={paymentProcessing} onCancel={() => setIsOpenBackThisLecture(false)} onFinish={handleBackThisLecture} />
 		</>
 	)
 }

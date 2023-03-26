@@ -20,13 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 					if (!contract) continue
 
-					const meta = await contract.getData()
+					// const meta = await contract.getData()
 					// const stage = await contract.getStage()
 
 					response.push({
 						...l,
 						meta: {
-							...meta,
+							// ...meta,
 							// stage,
 						},
 					})
@@ -41,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		res.status(200).json(response)
 	} catch (error: any) {
+		console.log('[API ERROR]', error)
 		res.status(502).json({ error: error.message || 'Something wrong' })
 	}
 }

@@ -20,11 +20,17 @@ export function addReturnStrategy(url: string, returnStrategy: 'back' | 'none'):
 	return link.toString()
 }
 
+export const sliceAddress = (address: string, symbolsCount = 16) => {
+	return address.slice(0, symbolsCount) + '...' + address.slice(-symbolsCount)
+}
+
 export const renderPrice = (price: string | number, style: 'currency' | 'decimal' = 'currency') => {
 	if (price == undefined) return null
 
 	return new Intl.NumberFormat('ru', {
 		style,
+		minimumFractionDigits: 3,
+		maximumFractionDigits: 3,
 		currency: 'TON',
 	}).format(Number.parseFloat(price.toString()))
 }

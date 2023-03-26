@@ -1,7 +1,9 @@
 import { fetcher } from '@/helpers/fetcher'
-import { Progress, Table, Typography } from 'antd'
+import { Grid, Progress, Table, TableColumnType, Typography } from 'antd'
+import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 import { HiOutlineChevronRight } from 'react-icons/hi'
 import useSWR from 'swr'
 import { fromNano } from 'ton'
@@ -11,6 +13,7 @@ const { Text } = Typography
 
 export const LecturesList = () => {
 	const route = useRouter()
+	const screens = Grid.useBreakpoint()
 	const { data, isLoading } = useSWR(['/api/lectures'], fetcher, {
 		refreshInterval: 10000,
 	})
@@ -23,65 +26,60 @@ export const LecturesList = () => {
 		return Math.ceil(percent * 100)
 	}
 
-	const renderPrice = (price: string, style: 'currency' | 'decimal' = 'currency') => {
-		if (price == undefined) return null
-
-		return new Intl.NumberFormat('ru', {
-			style,
-			currency: 'TON',
-		}).format(Number.parseFloat(fromNano(price)))
-	}
-
-	const columns = [
-		{
-			key: '1',
-			dataIndex: 'title',
-			title: 'Title',
-			width: '40%',
-			render: (title: string, data: any) => {
-				return (
-					<>
-						<Text>{title}</Text>
-						<br />
-						<Text type="secondary">
-							<small>{data.communityName}</small>
-						</Text>
-					</>
-				)
+	const columns: ColumnsType<any> = useMemo(
+		() => [
+			{
+				key: '1',
+				dataIndex: 'title',
+				title: 'Title',
+				width: '40%',
+				render: (title: string, data: any) => {
+					return (
+						<>
+							<Text>{title}</Text>
+							<br />
+							<Text type="secondary">
+								<small>{data.communityName}</small>
+							</Text>
+						</>
+					)
+				},
 			},
-		},
-		{
-			key: '2',
-			dataIndex: 'price',
-			title: 'Funding',
-			render: (price: number, lecture: any) => {
-				return <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+			{
+				key: '2',
+				dataIndex: 'price',
+				title: 'Funding',
+				render: (price: number, lecture: any) => {
+					return <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+				},
 			},
-		},
-		{
-			key: '3',
-			dataIndex: 'date',
-			width: '200px',
-			title: 'Funding ends in',
-			render: (date: string) => {
-				const endsIn = dayjs(date).subtract(2, 'hours').fromNow(true)
-				const parsedDate = dayjs(date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
+			{
+				key: '3',
+				dataIndex: 'date',
+				// responsive: ['md'],
+				width: '200px',
+				title: 'Funding ends in',
+				render: (date: string) => {
+					const endsIn = dayjs(date).subtract(2, 'hours').fromNow(true)
+					const parsedDate = dayjs(date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
 
-				return (
-					<>
-						<Text>{endsIn}</Text>
-						<br />
-						<Text type="secondary">{parsedDate}</Text>
-					</>
-				)
+					return (
+						<>
+							<Text>{endsIn}</Text>
+							<br />
+							<Text type="secondary">{parsedDate}</Text>
+						</>
+					)
+				},
 			},
-		},
-		{
-			key: 'arrow',
-			width: 50,
-			render: () => <HiOutlineChevronRight />,
-		},
-	]
+			{
+				key: 'arrow',
+				width: 50,
+				render: () => <HiOutlineChevronRight />,
+			},
+		],
+		[screens]
+	)
 
 	return (
 		<>
@@ -96,7 +94,7 @@ export const LecturesList = () => {
 					}
 				}}
 				loading={isLoading}
-				dataSource={data?.map((r: any) => ({ key: r.id, ...r }))}
+				dataSource={Array.isArray(data) ? data?.map((r: any) => ({ key: r.id, ...r })) : undefined}
 				columns={columns}
 				pagination={false}
 			/>

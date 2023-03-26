@@ -1,14 +1,28 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { TonContext } from '@/services/ton/context'
-import { Button, Row, Layout, Col, Space, Tag } from 'antd'
+import { Button, Row, Layout, Col, Space, Tag, Tooltip, Popover, Drawer, Grid, Menu } from 'antd'
 import Link from 'next/link'
 import styles from './style.module.css'
 import { AuthButton } from '../AuthButton'
+import { HiMenu } from 'react-icons/hi'
+import { useRouter } from 'next/router'
 
 const { Header } = Layout
 
 export const AppHeader = () => {
+	const router = useRouter()
+	const screens = Grid.useBreakpoint()
 	const { connector, network } = useContext(TonContext)
+	const [mobileMenuIsOpen, setMobileMenuIsOpen] = useState(false)
+
+	useEffect(() => {
+		setMobileMenuIsOpen(false)
+	}, [screens])
+
+	const handleChangeMobileAuthButton = async () => {
+		await router.push('/')
+		setMobileMenuIsOpen(false)
+	}
 
 	return (
 		<Header className={styles.header} style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%' }}>
@@ -29,15 +43,44 @@ export const AppHeader = () => {
 				</Col>
 				<Col>
 					<Space>
-						{connector?.connected && (
-							<Link href="/my/lectures" style={{ marginRight: '10px' }}>
-								<Button type="text">My Lectures</Button>
-							</Link>
+						{screens.md ? (
+							<>
+								{connector?.connected && (
+									<Link href="/my/lectures" style={{ marginRight: '10px' }}>
+										<Button type="text">My Lectures</Button>
+									</Link>
+								)}
+								<AuthButton />
+							</>
+						) : (
+							<Button
+								type="text"
+								shape="circle"
+								onClick={() => setMobileMenuIsOpen(true)}
+								icon={<HiMenu aria-label="menu" size={24} style={{ position: 'relative', top: 8 }} onClick={() => setMobileMenuIsOpen(true)} />}
+							></Button>
 						)}
-						<AuthButton />
 					</Space>
 				</Col>
 			</Row>
+			<Drawer title="Main menu" width="100%" onClose={() => setMobileMenuIsOpen(false)} open={mobileMenuIsOpen} extra={<AuthButton onChange={handleChangeMobileAuthButton} />}>
+				{connector?.connected && (
+					<Menu
+						mode="vertical"
+						style={{ background: 'transparent' }}
+						selectedKeys={[]}
+						selectable={false}
+						onClick={() => setMobileMenuIsOpen(false)}
+						items={[
+							{
+								key: '',
+								label: 'My Lectures',
+								onClick: () => router.push('/my/lectures'),
+							},
+						]}
+					/>
+				)}
+			</Drawer>
 		</Header>
 	)
 }
