@@ -50,7 +50,7 @@ export const AppHeader = () => {
 										<Button type="text">My Lectures</Button>
 									</Link>
 								)}
-								<AuthButton />
+								<AuthButton onChange={handleChangeMobileAuthButton} />
 							</>
 						) : (
 							<Button
