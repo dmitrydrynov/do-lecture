@@ -147,7 +147,7 @@ const LecturePage = () => {
 								)}
 							/>
 							<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
-							<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)} style={{ marginTop: 16, display: 'flex', width: '100%' }}>
+							<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)} style={{ marginTop: 16, width: '100%' }}>
 								Back this lecture
 							</Button>
 						</Space>
