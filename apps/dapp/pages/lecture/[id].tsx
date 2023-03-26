@@ -29,6 +29,14 @@ const LecturePage = () => {
 		refreshInterval: 10000,
 	})
 
+	const calculateProgress = (lecture: any) => {
+		if (!lecture.meta) return 0
+
+		const percent = (lecture.meta.goal - lecture.meta.left) / lecture.meta.goal
+
+		return Math.ceil(percent * 100)
+	}
+
 	const detailsData = useMemo(() => {
 		if (!data) return
 
@@ -40,7 +48,7 @@ const LecturePage = () => {
 						<Tag color="success" style={{ marginRight: 0 }}>
 							{data.stage}
 						</Tag>
-						<Progress showInfo={true} strokeWidth={16} percent={45} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} style={{ marginTop: 8 }} />
+						<Progress showInfo={true} strokeWidth={16} percent={calculateProgress(data)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} style={{ marginTop: 8 }} />
 					</>
 				),
 			},
