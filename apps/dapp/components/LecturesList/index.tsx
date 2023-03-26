@@ -41,10 +41,10 @@ export const LecturesList = () => {
 							<Text>{title}</Text>
 							<br />
 							<Text type="secondary">
-								<small>{data.communityName}</small>
+								<small>in {data.communityName}</small>
 							</Text>
 							<br />
-							<Text type="secondary">Funding ends in {parsedDate}</Text>
+							{!screens.md && <Text type="secondary">Funding ends in {parsedDate}</Text>}
 						</>
 					)
 				},
