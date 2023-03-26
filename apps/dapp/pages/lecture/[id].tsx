@@ -163,17 +163,6 @@ const LecturePage = () => {
 				</Row>
 			</Typography>
 
-			{/* <Row gutter={[64, 32]} wrap style={{ marginTop: 24 }} justify="space-between">
-				<Col xs={{ order: 1 }} md={{ order: 0 }}>
-					<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)}>
-						Back this lecture
-					</Button>
-				</Col>
-				<Col xs={{ order: 0 }} md={{ order: 1 }}>
-					<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
-				</Col>
-			</Row> */}
-
 			{data.meta.paymentCount > 0 && (
 				<Typography style={{ marginTop: 64 }}>
 					<Title level={4}>Contribution history</Title>

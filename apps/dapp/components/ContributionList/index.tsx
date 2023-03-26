@@ -26,7 +26,7 @@ export const ContributionList = ({ lectureId }: any) => {
 			dataIndex: 'value',
 			title: 'Amount',
 			render: (value: number) => (
-				<Text style={{whiteSpace: 'nowrap'}}>
+				<Text style={{ whiteSpace: 'nowrap' }}>
 					<TonCoinSvg /> {renderPrice(fromNano(value), 'decimal')}
 				</Text>
 			),
@@ -43,7 +43,7 @@ export const ContributionList = ({ lectureId }: any) => {
 			title: 'From',
 			render: (address: string) => (
 				<Text ellipsis={true}>
-					<Link href={`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${address}`} target="_blank">
+					<Link href={`https://${network == 'testnet' || process.env.NEXT_PUBLIC_IS_TESTNET == 'true' ? 'testnet.' : ''}tonscan.org/address/${address}`} target="_blank">
 						{sliceAddress(address, sceens.md ? 16 : 3)}
 					</Link>
 				</Text>
