@@ -31,10 +31,6 @@ const LecturePage = () => {
 	})
 	const { trigger: checkLectureStage }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/check-stage', (url, { arg }) => fetcher([url, arg]))
 
-	useEffect(() => {
-		checkLectureStage({ id })
-	}, [])
-
 	const calculateProgress = (lecture: any) => {
 		if (!lecture.meta) return 0
 
@@ -99,7 +95,7 @@ const LecturePage = () => {
 				attempt++
 			}
 
-			await checkLectureStage(id)
+			await checkLectureStage({ id })
 
 			setIsOpenBackThisLecture(false)
 			messageApi.open({
