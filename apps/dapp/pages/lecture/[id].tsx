@@ -1,8 +1,8 @@
-import { ReactNode, useContext, useMemo, useState } from 'react'
+import { ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import { ContributionList } from '@/components/ContributionList'
 import { AppCountdown } from '@/components/Countdown'
 import PublicLayout from '@/components/layouts/PublicLayout'
-import { getFetcher } from '@/helpers/fetcher'
+import { fetcher, getFetcher } from '@/helpers/fetcher'
 import { renderPrice } from '@/helpers/utils'
 import { Button, Col, List, Row, Space, Tag, Typography, message, Progress } from 'antd'
 import dayjs from 'dayjs'
@@ -14,6 +14,7 @@ import { TonContext } from '@/services/ton/context'
 import { wrapper } from 'lecture-contract'
 import { BackThisLecture } from '@/components/modals/BackThisLecture'
 import { sleep } from '@/services/ton/provider'
+import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 
 const { Text, Paragraph, Title } = Typography
 const { Lecture } = wrapper
@@ -28,6 +29,11 @@ const LecturePage = () => {
 	const { data, isLoading } = useSWR(['/api/lecture', { id }], getFetcher, {
 		refreshInterval: 10000,
 	})
+	const { trigger: checkLectureStage }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/check-stage', (url, { arg }) => fetcher([url, arg]))
+
+	useEffect(() => {
+		checkLectureStage({ id })
+	}, [])
 
 	const calculateProgress = (lecture: any) => {
 		if (!lecture.meta) return 0
@@ -82,8 +88,6 @@ const LecturePage = () => {
 			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(data.contractAddress)))
 			await lectureContract.sendPay(provider.sender(), toNano(amount.toString()))
 
-			console.log()
-
 			let attempt = 0
 			const userPayments = await lectureContract.getPaymentsByUser(Address.parse(userWallet.account.address))
 			let newLength = userPayments?.length
@@ -94,6 +98,8 @@ const LecturePage = () => {
 				newLength = _userPayments?.length
 				attempt++
 			}
+
+			await checkLectureStage(id)
 
 			setIsOpenBackThisLecture(false)
 			messageApi.open({

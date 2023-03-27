@@ -1,7 +1,5 @@
-import { getFundingPaidLectures } from '@/services/airtable'
+import { getLecturesByStage } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton/provider'
-import { defaultCookie } from 'config/cookie'
-import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 
@@ -10,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		if (req.method !== 'POST') return res.status(503).end()
 
 		const response: any[] = []
-		let lectures = await getFundingPaidLectures()
+		let lectures = await getLecturesByStage(['run-up', 'implementation'])
 
 		if (lectures.length > 0) {
 			for (const l of lectures) {

@@ -48,6 +48,17 @@ export const cancelLecture = async (id: string) => {
 	}
 }
 
+export const updateLectureStage = async (id: string, newStage: string) => {
+	try {
+		await AirtableService('Lecture').update(id, {
+			stage: newStage,
+		})
+	} catch (error: any) {
+		console.error('[AIRTABLE ERROR]', error)
+		throw error
+	}
+}
+
 export const deleteDraftLecture = async (id: string) => {
 	try {
 		const [lecture] = await AirtableService('Lecture')
@@ -82,13 +93,13 @@ export const getPaidLecturesByUser = async (userId: string, status: string[] = [
 	}
 }
 
-export const getFundingPaidLectures = async () => {
+export const getLecturesByStage = async (stage: string[]) => {
 	try {
 		const list = await AirtableService('Lecture')
 			.select({
-				// filterByFormula: `AND(status = "published", DATETIME_DIFF(date, "${dayjs().toISOString()}", 'hours') > 2)`,
-				// maxRecords: 200,
-				// sort: [{ field: 'date', direction: 'asc' }],
+				filterByFormula: `AND(status = "published", FIND(stage, "${stage.join(' ')}"))`,
+				maxRecords: 200,
+				sort: [{ field: 'date', direction: 'asc' }],
 			})
 			.all()
 

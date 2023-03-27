@@ -12,6 +12,7 @@ import {
 	WalletNotConnectedError,
 	LocalstorageNotFoundError,
 } from '@tonconnect/sdk'
+import dayjs from 'dayjs'
 import { wrapper } from 'lecture-contract'
 import { Address, beginCell, Cell, Contract, Sender, SenderArguments, StateInit, storeStateInit, TonClient } from 'ton'
 
@@ -60,6 +61,52 @@ export const getLectureData = async (lectureAddress: Address) => {
 	const lecture = await initLectureContract(lectureAddress)
 
 	return await lecture?.getData()
+}
+
+export const getLectureStage = async (lectureAddress: Address, duration: number) => {
+	const lecture = await initLectureContract(lectureAddress)
+	const data = await lecture?.getData()
+	const lectureDate = dayjs(data.startTime * 1000)
+	const nowDate = dayjs()
+	const diff = nowDate.diff(lectureDate, 'h')
+	let actualStage = 'funding'
+
+	// funding period
+	if (diff < -2) {
+		actualStage = 'funding'
+
+		if (data.left <= 0) actualStage = 'run-up'
+	}
+
+	// if wasn't funded
+	if (diff >= -2 && data.left > 0) {
+		actualStage = 'canceled'
+	}
+
+	// if funded
+	if (data.left <= 0) {
+		// run-up period
+		if (diff >= -2 && diff < 0) {
+			actualStage = 'run-up'
+		}
+
+		// implementation period
+		if (diff >= 0 && diff < duration / 60) {
+			actualStage = 'implementation'
+		}
+
+		// completing period
+		if (diff > duration / 60 && diff <= duration / 60 + 2) {
+			actualStage = 'completing'
+		}
+
+		// finished period
+		if (diff > duration / 60 + 2) {
+			actualStage = 'finished'
+		}
+	}
+
+	return actualStage
 }
 
 export class TonConnectProvider {

@@ -1,25 +1,14 @@
 import { ReactElement, useContext, useState } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { LecturesList } from '@/components/LecturesList'
-import { TonContext } from '@/services/ton/context'
 import styles from '@/styles/Home.module.css'
-import { Typography } from 'antd'
+import { Space, Typography } from 'antd'
 import Head from 'next/head'
-// import dynamic from 'next/dynamic'
-
-// const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
+import { ReadyLecturesList } from '@/components/ReadyLecturesList'
 
 const { Title, Text } = Typography
 
-const Home = ({ user }: any) => {
-	const { connector, userWallet } = useContext(TonContext)
-	const [lectureModalOpen, setLectureModalOpen] = useState(false)
-
-	// const handleAddLecture = () => {
-	// 	setLectureModalOpen(false)
-	// refetchLectures()
-	// }
-
+const Home = () => {
 	return (
 		<>
 			<Head>
@@ -33,10 +22,18 @@ const Home = ({ user }: any) => {
 					<Title>Decentralized crowdfunding for lectures</Title>
 					<Text type="secondary">Share knowledge with your community. This is a platform where you can find funding for interesting lectures</Text>
 				</div>
-				<LecturesList />
+				<Space direction="vertical" style={{width: '100%'}}>
+					<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
+						Looking for funding
+					</Title>
+					<LecturesList />
+					<br />
+					<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
+						Funded lectures
+					</Title>
+					<ReadyLecturesList />
+				</Space>
 			</main>
-
-			{/* <LectureModal open={lectureModalOpen} onFinish={handleAddLecture} onCancel={() => setLectureModalOpen(false)} /> */}
 		</>
 	)
 }
