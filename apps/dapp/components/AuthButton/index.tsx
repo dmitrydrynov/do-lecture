@@ -47,7 +47,7 @@ export const AuthButton = ({ onChange = () => {} }: any) => {
 			})
 
 			if (isMobile()) {
-				openLink(addReturnStrategy(universalLink, 'none'), '_blank')
+				openLink(addReturnStrategy(universalLink, 'back'), '_blank')
 			} else {
 				setUniversalLink(universalLink)
 			}

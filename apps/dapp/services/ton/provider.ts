@@ -134,13 +134,13 @@ export class TonConnectProvider {
 	}
 
 	sender() {
-		if (isMobile() && this.universalLink) {
-			openLink(addReturnStrategy(this.universalLink, 'none'), '_blank')
-		}
-
 		const sender: Sender = {
 			address: this.connector.account ? Address.parseRaw(this.connector.account.address) : undefined,
 			send: async (args: SenderArguments) => {
+				if (['iphone', 'ipad', 'android'].includes(this.connector.wallet?.device?.platform || '') && this.universalLink) {
+					openLink(addReturnStrategy(this.universalLink, 'back'), '_blank')
+				}
+
 				try {
 					const stateInitCell = args.init
 						? beginCell()
