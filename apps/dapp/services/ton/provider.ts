@@ -1,3 +1,4 @@
+import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
 import {
 	TonConnect,
 	UserRejectsError,
@@ -112,10 +113,12 @@ export const getLectureStage = async (lectureAddress: Address) => {
 export class TonConnectProvider {
 	connector: TonConnect
 	network: string
+	universalLink?: string
 
-	constructor(connector: TonConnect, network = 'mainnet') {
+	constructor(connector: TonConnect, network = 'mainnet', universalLink?: string) {
 		this.connector = connector
 		this.network = network
+		this.universalLink = universalLink
 	}
 
 	async getNetwork() {
@@ -131,6 +134,10 @@ export class TonConnectProvider {
 	}
 
 	sender() {
+		if (isMobile() && this.universalLink) {
+			openLink(addReturnStrategy(this.universalLink, 'none'), '_blank')
+		}
+
 		const sender: Sender = {
 			address: this.connector.account ? Address.parseRaw(this.connector.account.address) : undefined,
 			send: async (args: SenderArguments) => {

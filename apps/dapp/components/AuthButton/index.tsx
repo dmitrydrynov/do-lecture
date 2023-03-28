@@ -11,16 +11,16 @@ import styles from './style.module.css'
 const { Text, Paragraph } = Typography
 
 export const AuthButton = ({ onChange = () => {} }: any) => {
-	const { connector, availableWallets, userWallet, network } = useContext(TonContext)
+	const { connector, availableWallets, userWallet, network, universalLink, setUniversalLink } = useContext(TonContext)
 	const [selectWalletModal, setSelectWalletModal] = useState(false)
-	const [universalLink, setUniversalLink] = useState('')
+	// const [universalLink, setUniversalLink] = useState('')
 	const [selectedWallet, setSelectedWallet] = useState<any>()
 
 	const address = useSlicedAddress(userWallet?.account.address, network)
 
 	useEffect(() => {
 		if (connector?.connected) {
-			setUniversalLink('')
+			setUniversalLink(undefined)
 			setSelectWalletModal(false)
 		}
 	}, [connector, userWallet])

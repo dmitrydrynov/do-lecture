@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { createContext, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, createContext, useEffect, useState } from 'react'
 import TonConnect, { CHAIN, TonConnectError, Wallet, WalletInfo } from '@tonconnect/sdk'
 import { Address } from 'ton'
 import { sha256 } from 'ton-crypto'
@@ -12,6 +12,8 @@ export type TonContextType = {
 	userWallet?: Wallet
 	network?: 'testnet' | 'mainnet'
 	availableWallets?: WalletInfo[]
+	universalLink?: string
+	setUniversalLink: Dispatch<SetStateAction<string | undefined>>
 }
 
 const networkName: { [key: string]: 'testnet' | 'mainnet' } = {
@@ -19,7 +21,7 @@ const networkName: { [key: string]: 'testnet' | 'mainnet' } = {
 	[CHAIN.TESTNET]: 'testnet',
 }
 
-export const TonContext = createContext<TonContextType>({ isConnected: false })
+export const TonContext = createContext<TonContextType>({ isConnected: false, setUniversalLink: () => {} })
 
 export const useTonContext = ({ onConnectError }: any) => {
 	const [connector, setConnector] = useState<TonConnect>()
@@ -28,6 +30,7 @@ export const useTonContext = ({ onConnectError }: any) => {
 	const [network, setNetwork] = useState<'testnet' | 'mainnet'>()
 	const [user, setUser] = useState()
 	const [provider, setProvider] = useState<TonConnectProvider>()
+	const [universalLink, setUniversalLink] = useState<string>()
 
 	useEffect(() => {
 		const connector = new TonConnect({
@@ -43,7 +46,7 @@ export const useTonContext = ({ onConnectError }: any) => {
 	useEffect(() => {
 		if (!connector) return
 
-		const p = new TonConnectProvider(connector, network)
+		const p = new TonConnectProvider(connector, network, universalLink)
 		setProvider(p)
 
 		connector.getWallets().then((list) => {
@@ -96,5 +99,5 @@ export const useTonContext = ({ onConnectError }: any) => {
 		console.log(`Connected to wallet [${walletAdress}]`)
 	}
 
-	return { connector, isConnected: connector ? connector?.connected : false, provider, availableWallets, userWallet, network, user }
+	return { connector, isConnected: connector ? connector?.connected : false, provider, availableWallets, userWallet, network, user, universalLink, setUniversalLink }
 }
