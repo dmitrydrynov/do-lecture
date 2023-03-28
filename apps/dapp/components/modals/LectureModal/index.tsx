@@ -10,7 +10,6 @@ import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { Address, Cell, toNano } from 'ton-core'
 
-const { confirm } = Modal
 const { Lecture } = wrapper
 const { Title, Text, Paragraph } = Typography
 
@@ -23,6 +22,7 @@ interface LectureModalParams {
 
 export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureModalParams) => {
 	const [form] = useForm()
+	const [modal, modalHolder] = Modal.useModal()
 	const { isConnected, provider, userWallet } = useContext(TonContext)
 	const settings = useContext(SettingsContext)
 	const [formData, setFormData] = useState<any>()
@@ -76,6 +76,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 				Lecture.createFromConfig(
 					{
 						startTime: startTime.unix(),
+						duration: Number.parseInt(data.duration) * 60,
 						goal: toNano(data.price.toString()),
 						serviceAddress: Address.parse(settings.serviceWallet),
 						managerAddress: Address.parse(community.managerAddress),
@@ -167,8 +168,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 
 	const showDeployConfirm = async (record: any) => {
 		await form.validateFields()
-
-		confirm({
+		modal.confirm({
 			type: 'info',
 			title: `Publish`,
 			content: (
@@ -194,6 +194,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 	return (
 		<>
 			{contextHolder}
+			{modalHolder}
 			<Modal
 				forceRender
 				centered

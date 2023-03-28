@@ -7,6 +7,7 @@ export async function run(provider: NetworkProvider) {
         Lecture.createFromConfig(
             {
                 startTime: Math.floor(Date.now() / 1000 + 60 * 60 * 4),
+                duration: 1800,
                 goal: toNano('1.5'),
                 serviceAddress: Address.parse('EQCEMXa-Y0atAWiwS4ZqG9jwXgnrw4qVlXgIFpn648DFgt18'),
                 lecturerAddress: Address.parse('EQB6LmhSEwtpVlX5RPU90t0DPoYgituWnFbOpi78VKcdrJAH'),

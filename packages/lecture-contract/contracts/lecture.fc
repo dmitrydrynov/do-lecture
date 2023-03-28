@@ -10,6 +10,7 @@
 
 ;; storage variables
 global int start_time; ;; uint32
+global int duration; ;; uint16
 global int goal; ;;uint64
 global int left; ;;left
 global slice service_address; ;; MsgAddressInt
@@ -24,11 +25,13 @@ const int START_LESSON_PRICE = 1000000000; ;; minimal payment 1 ton = 1000000000
 const int SERVICE_FEE_AMOUNT = 5; ;; percents
 const int END_FUNDING_PERIOD = 7200; ;; seconds, 2 hours before start_time
 const int END_REPORTING_PERIOD = 7200; ;; seconds, 2 hours after start_time
+const int MAX_DURATION = 64800; ;; 18 hours
 
 () load_data () impure {
     var ds = get_data().begin_parse();
 
     start_time = ds~load_uint(32);
+    duration = ds~load_uint(16);
     service_address = ds~load_msg_addr();
     manager_address = ds~load_msg_addr();
     lecturer_address = ds~load_msg_addr();
@@ -45,6 +48,7 @@ const int END_REPORTING_PERIOD = 7200; ;; seconds, 2 hours after start_time
     set_data(
         begin_cell()
             .store_uint(start_time, 32)
+            .store_uint(duration, 16)
             .store_slice(service_address)
             .store_slice(manager_address)
             .store_slice(lecturer_address)
@@ -70,7 +74,11 @@ int total_payments() impure {
     (int key, slice val, int f?) = payments.udict_get_min?(16);
     int total_amount = 0;
     while (f?) {
-        total_amount += val~load_uint(64);
+        slice sender_address = val~load_msg_addr();
+        int time = val~load_uint(32);
+        int amount = val~load_uint(64);
+
+        total_amount += amount;
         (key, val, f?) = payments.udict_get_next?(16, key);
     }
 
@@ -109,10 +117,14 @@ int total_payments() impure {
     (int key, slice val, int f?) = payments~udict::delete_get_min(16);
     ;; ~dump(2);
     while (f?) {
+        slice sender_address = val~load_msg_addr();
+        int time = val~load_uint(32);
+        int amount = val~load_uint(64);
+
         send_raw_message(begin_cell()
             .store_uint(0x18, 6)
-            .store_slice(account_to_address(key))
-            .store_coins(val.preload_uint(64))
+            .store_slice(sender_address)
+            .store_coins(amount)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 32)
             .store_slice("Refund of payment")
         .end_cell(), message_mode::ignore_errors);
@@ -137,6 +149,24 @@ int total_payments() impure {
         .store_slice("Payment for a lecture")
     .end_cell(), message_mode::sender_pay_fee + message_mode::ignore_errors);
     destroy();
+}
+
+int senderHasPayments (slice address) impure {
+    load_data();
+
+    int hasPayments = false;
+    (int key, slice val, int f?) = payments.udict_get_min?(16);
+    while (f?) {
+        slice v = val;
+        if(equal_slice_bits(val~load_msg_addr(), address)) {
+            hasPayments = true;
+            f? = false;
+        } else {
+            (key, val, f?) = payments.udict_get_next?(16, key);
+        }
+    }
+
+    return hasPayments;
 }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -171,7 +201,7 @@ int total_payments() impure {
         return ();
     }
     
-    load_data(); ;; here we populate the storage variables
+    load_data(); ;; here we populate the storage variables      
 
     int reached = left <= 0;
     (_, slice sender_original) = cs.load_msg_addr();
@@ -196,12 +226,12 @@ int total_payments() impure {
     }
 
     elseif (op == op::report()) {
-        throw_unless(715, ~ equal_slice_bits(sender_original, service_address));
-        throw_unless(714, ~ equal_slice_bits(sender_original, manager_address));
-        throw_unless(709, ~ equal_slice_bits(sender_original, lecturer_address));
+        throw_if(715, equal_slice_bits(sender_original, service_address));
+        throw_if(714, equal_slice_bits(sender_original, manager_address));
+        throw_if(709, equal_slice_bits(sender_original, lecturer_address));
         throw_unless(702, now() > start_time);
-        (slice val, int f?) = payments.udict_get?(16, sender);
-        throw_unless(703, f?);
+        throw_if(703, ~ senderHasPayments(sender_original));
+
         (int last_report, _, int f?) = reports.udict_get_max?(16);
 
         if (~ f?) {
@@ -238,7 +268,6 @@ int total_payments() impure {
 
     elseif (op == op::cancel()) {
         ;; ~dump(0);
-        throw_if(715, equal_slice_bits(sender_original, service_address));
         throw_unless(707, equal_slice_bits(sender_original, lecturer_address));
         ;; ~dump(1);
         return_money();
@@ -274,7 +303,7 @@ int total_payments() impure {
     }
 
     elseif (op == op::try_payout()) {
-        throw_unless(711, now() >= start_time + END_REPORTING_PERIOD);
+        throw_unless(711, now() >= start_time + duration + END_REPORTING_PERIOD);
         (_, _, int f?) = reports.udict_get_max?(16);
         throw_if(712, f?);
         accept_message();
@@ -284,7 +313,7 @@ int total_payments() impure {
 
 ;; get-methods
 
-(int, int, int, slice, slice, slice, int, int) get_all_data () method_id {
+(int, int, int, int, slice, slice, slice, int, int) get_all_data () method_id {
     load_data();
 
     (int key, slice val, int f?) = reports.udict_get_min?(16);
@@ -301,7 +330,7 @@ int total_payments() impure {
         (key, val, f?) = payments.udict_get_next?(16, key);
     }
 
-    return (start_time, goal, left, service_address, manager_address, lecturer_address, payments_count, reports_count);
+    return (start_time, duration, goal, left, service_address, manager_address, lecturer_address, payments_count, reports_count);
 }
 
 (int, int) get_left_goal () method_id {

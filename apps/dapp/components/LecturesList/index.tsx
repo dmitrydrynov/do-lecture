@@ -9,7 +9,7 @@ import useSWR from 'swr'
 import { fromNano } from 'ton'
 import styles from './style.module.css'
 
-const { Text } = Typography
+const { Text, Title } = Typography
 
 export const LecturesList = () => {
 	const route = useRouter()
@@ -32,7 +32,7 @@ export const LecturesList = () => {
 				key: '1',
 				dataIndex: 'title',
 				title: 'Lectures',
-				width: screens.xs ? '100%' : '40%',
+				width: !screens.md ? '100%' : '40%',
 				render: (title: string, data: any) => {
 					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
 
@@ -86,8 +86,13 @@ export const LecturesList = () => {
 		[screens]
 	)
 
+	if (!data?.length) return null
+
 	return (
 		<>
+			<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
+				Looking for funding
+			</Title>
 			<Table
 				className={styles.table}
 				rowClassName={styles.tableRow}

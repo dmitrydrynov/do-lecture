@@ -63,7 +63,7 @@ export const getLectureData = async (lectureAddress: Address) => {
 	return await lecture?.getData()
 }
 
-export const getLectureStage = async (lectureAddress: Address, duration: number) => {
+export const getLectureStage = async (lectureAddress: Address) => {
 	const lecture = await initLectureContract(lectureAddress)
 	const data = await lecture?.getData()
 	const lectureDate = dayjs(data.startTime * 1000)
@@ -91,17 +91,17 @@ export const getLectureStage = async (lectureAddress: Address, duration: number)
 		}
 
 		// implementation period
-		if (diff >= 0 && diff < duration / 60) {
+		if (diff >= 0 && diff < data.duration / 3600) {
 			actualStage = 'implementation'
 		}
 
 		// completing period
-		if (diff > duration / 60 && diff <= duration / 60 + 2) {
+		if (diff > data.duration / 3600 && diff <= data.duration / 3600 + 2) {
 			actualStage = 'completing'
 		}
 
 		// finished period
-		if (diff > duration / 60 + 2) {
+		if (diff > data.duration / 3600 + 2) {
 			actualStage = 'finished'
 		}
 	}

@@ -45,6 +45,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 
 		res.status(200).json(response)
 	} catch (error: any) {
+		console.error(error)
 		res.status(502).json({ error: error.message || 'Something wrong' })
 	}
 }, defaultCookie)

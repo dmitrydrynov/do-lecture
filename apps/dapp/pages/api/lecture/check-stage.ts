@@ -1,6 +1,5 @@
 import AirtableService, { cancelLecture, updateLectureStage } from '@/services/airtable'
 import { getLectureStage } from '@/services/ton/provider'
-import Airtable from 'airtable'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton-core'
 
@@ -14,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		if (!lecture) throw Error('Dont find the lecture')
 
-		const currentStage = await getLectureStage(Address.parse(lecture.get('contractAddress') as string), lecture.get('duration') as number)
+		const currentStage = await getLectureStage(Address.parse(lecture.get('contractAddress') as string))
 
 		if (lecture.get('stage') !== currentStage) await updateLectureStage(id, currentStage)
 

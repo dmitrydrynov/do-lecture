@@ -15,6 +15,8 @@ import { wrapper } from 'lecture-contract'
 import { BackThisLecture } from '@/components/modals/BackThisLecture'
 import { sleep } from '@/services/ton/provider'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
+import { HiArrowSmRight } from 'react-icons/hi'
+import Link from 'next/link'
 
 const { Text, Paragraph, Title } = Typography
 const { Lecture } = wrapper
@@ -156,10 +158,25 @@ const LecturePage = () => {
 									</List.Item>
 								)}
 							/>
-							<AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />
-							<Button type="primary" size="large" onClick={() => setIsOpenBackThisLecture(true)} style={{ marginTop: 16, width: '100%' }}>
-								Back this lecture
-							</Button>
+							{['funding', 'run-up'].includes(data.stage) && <AppCountdown date={dayjs(data.date).subtract(2, 'hours').toISOString()} />}
+							<Row gutter={[16, 16]} justify="center" style={{ marginTop: 16 }}>
+								{['funding', 'run-up'].includes(data.stage) && (
+									<Col>
+										<Button type={data.stage == 'funding' ? 'primary' : 'default'} size="large" onClick={() => setIsOpenBackThisLecture(true)}>
+											Back this lecture
+										</Button>
+									</Col>
+								)}
+								{['implementation', 'completing', 'run-up'].includes(data.stage) && (
+									<Col>
+										<Link href={data.link} target='_blank'>
+											<Button type="primary" size="large">
+												Go to lecture <HiArrowSmRight style={{ height: 16, position: 'relative', top: 3 }} />
+											</Button>
+										</Link>
+									</Col>
+								)}
+							</Row>
 						</Space>
 					</Col>
 				</Row>

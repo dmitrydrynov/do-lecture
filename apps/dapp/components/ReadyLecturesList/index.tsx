@@ -1,15 +1,14 @@
 import { fetcher } from '@/helpers/fetcher'
-import { Grid, Progress, Table, TableColumnType, Typography } from 'antd'
+import { Grid, Table, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { HiOutlineChevronRight } from 'react-icons/hi'
 import useSWR from 'swr'
-import { fromNano } from 'ton'
 import styles from './style.module.css'
 
-const { Text } = Typography
+const { Text, Title } = Typography
 
 export const ReadyLecturesList = () => {
 	const route = useRouter()
@@ -32,7 +31,7 @@ export const ReadyLecturesList = () => {
 				key: '1',
 				dataIndex: 'title',
 				title: 'Lectures',
-				width: screens.xs ? '100%' : '40%',
+				// width: screens.xs ? '100%' : '40%',
 				render: (title: string, data: any) => {
 					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
 
@@ -44,7 +43,7 @@ export const ReadyLecturesList = () => {
 								<small>in {data.communityName}</small>
 							</Text>
 							<br />
-							{!screens.md && <Text type="secondary">Funding ends in {parsedDate}</Text>}
+							{!screens.md && <Text type="secondary">Start at {parsedDate}</Text>}
 						</>
 					)
 				},
@@ -77,8 +76,13 @@ export const ReadyLecturesList = () => {
 		[screens]
 	)
 
+	if (!data?.length) return null
+
 	return (
 		<>
+			<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
+				Funded lectures
+			</Title>
 			<Table
 				className={styles.table}
 				rowClassName={styles.tableRow}

@@ -15,6 +15,7 @@ import {
 
 export type LectureConfig = {
     startTime: number;
+    duration: number;
     serviceAddress: Address;
     managerAddress: Address;
     lecturerAddress: Address;
@@ -38,6 +39,7 @@ export interface ReportsLibrary {
 export function lectureConfigToCell(config: LectureConfig): Cell {
     return beginCell()
         .storeUint(config.startTime, 32)
+        .storeUint(config.duration, 16)
         .storeAddress(config.serviceAddress)
         .storeAddress(config.managerAddress)
         .storeAddress(config.lecturerAddress)
@@ -76,7 +78,7 @@ const ReportsDictValue: DictionaryValue<ReportsLibrary> = {
     },
 };
 
-enum LectureError {
+export enum LectureError {
     PAY_NOT_ENOUGH = 700,
     PAY_AFTER_START = 701,
     REPORT_BEFORE_START = 702,
@@ -310,6 +312,7 @@ export class Lecture implements Contract {
             data = {
                 ...data,
                 startTime: tuple.readNumber(),
+                duration: tuple.readNumber(),
                 goal: tuple.readNumber(),
                 left: tuple.readNumber(),
                 serviceAddress: tuple.readCell().beginParse().loadAddress(),

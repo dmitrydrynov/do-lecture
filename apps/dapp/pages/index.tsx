@@ -22,15 +22,9 @@ const Home = () => {
 					<Title>Decentralized crowdfunding for lectures</Title>
 					<Text type="secondary">Share knowledge with your community. This is a platform where you can find funding for interesting lectures</Text>
 				</div>
-				<Space direction="vertical" style={{width: '100%'}}>
-					<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
-						Looking for funding
-					</Title>
+				<Space direction="vertical" size="large" style={{ width: '100%' }}>
 					<LecturesList />
 					<br />
-					<Title level={4} type="secondary" style={{ textAlign: 'center' }}>
-						Funded lectures
-					</Title>
 					<ReadyLecturesList />
 				</Space>
 			</main>

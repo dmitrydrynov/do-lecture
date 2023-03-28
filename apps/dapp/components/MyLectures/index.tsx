@@ -22,12 +22,12 @@ const { confirm } = Modal
 const { Paragraph, Text } = Typography
 
 export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) => {
+	const [modal, confirmHolder] = Modal.useModal()
 	const [shouldUpdate, setShouldUpdate] = useState(false)
 	const [lectureForEdit, setLectureForEdit] = useState<any>()
 	const [filterStatus, setFilterStatus] = useState<string>('all')
 	const { connector, provider, network, userWallet } = useContext(TonContext)
-	const [amount, setAmount] = useState<number>(0.01)
-	const [messageApi, contextHolder] = message.useMessage()
+	const [messageApi, messageHolder] = message.useMessage()
 	const { trigger: cancelLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/cancel', (url, { arg }) => fetcher([url, arg]))
 	const { trigger: deleteDraftLecture }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/delete', (url, { arg }) => fetcher([url, arg]))
 	const {
@@ -35,7 +35,9 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		mutate: refetchLectures,
 		isLoading,
 	} = useSWR(connector?.connected ? ['/api/my/lectures', { filterStatus }] : null, fetcher, {
-		refreshInterval: 10000, revalidateOnFocus: false,
+		refreshInterval: 10000,
+		revalidateOnFocus: false,
+		revalidateOnMount: true,
 	})
 
 	useEffect(() => {
@@ -45,14 +47,6 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	useEffect(() => {
 		if (forceUpdate) setShouldUpdate((u) => !u)
 	}, [forceUpdate])
-
-	const calculateProgress = (lecture: any) => {
-		if (!lecture.meta) return 0
-
-		const percent = (lecture.meta.goal - lecture.meta.left) / lecture.meta.goal
-
-		return Math.ceil(percent * 100)
-	}
 
 	const handleCancelLecture = async (lecture: any) => {
 		if (!userWallet || !provider) return
@@ -70,6 +64,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 
 			messageApi.open({
 				content: 'The transaction sent. The lecture cancelling...',
+				duration: 0,
 				key: 'cancelLectureProcessing',
 			})
 
@@ -113,7 +108,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	}
 
 	const showDeleteConfirm = (record: any) => {
-		confirm({
+		modal.confirm({
 			type: 'error',
 
 			title: 'Delete',
@@ -131,7 +126,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 	}
 
 	const showCancelConfirm = (record: any) => {
-		confirm({
+		modal.confirm({
 			type: 'warning',
 			title: 'Cancel',
 			content: (
@@ -164,7 +159,7 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 		{
 			title: 'Date',
 			dataIndex: 'date',
-			width: '160px',
+			width: '180px',
 			key: 'name',
 			render: (date) => {
 				const isCurrentYear = dayjs(date).year() == dayjs().year()
@@ -227,7 +222,8 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 
 	return (
 		<>
-			{contextHolder}
+			{messageHolder}
+			{confirmHolder}
 			<Segmented
 				value={filterStatus}
 				onChange={handleChangeFilterStatus}

@@ -52,6 +52,7 @@ export const updateLectureStage = async (id: string, newStage: string) => {
 	try {
 		await AirtableService('Lecture').update(id, {
 			stage: newStage,
+			status: newStage == 'canceled' || newStage == 'finished' ? 'closed' : undefined,
 		})
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
@@ -89,7 +90,7 @@ export const getPaidLecturesByUser = async (userId: string, status: string[] = [
 		return list?.length > 0 ? list.map((l) => parseAirtableRecord(l)) : []
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
-		throw error
+		return
 	}
 }
 
