@@ -77,7 +77,7 @@ const LecturePage = () => {
 		setPaymentProcessing(true)
 		messageApi.open({
 			type: 'loading',
-			content: 'Waiting...',
+			content: 'Confirm the operation in the wallet application. Waiting...',
 			duration: 0,
 			key: 'paymentProcess',
 		})
