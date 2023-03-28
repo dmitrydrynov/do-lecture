@@ -131,7 +131,7 @@ const LecturePage = () => {
 			<Head>
 				<title>{data?.title}</title>
 				<meta property="og:title" content={data?.title} key="title" />
-				<meta property="description" content={data?.description} key="description" />
+				<meta name="description" content={data?.description} key="description" />
 			</Head>
 			{contextHolder}
 			<Typography>

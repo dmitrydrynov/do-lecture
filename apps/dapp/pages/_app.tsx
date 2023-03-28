@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 			<Head>
 				<title>Delecture</title>
 				<meta property="og:title" content="My page title" key="title" />
-				<meta property="description" content="Share knowledge with your community. This is a platform where you can find funding for interesting lectures" key="description" />
+				<meta name="description" content="Share knowledge with your community. This is a platform where you can find funding for interesting lectures" key="description" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
