@@ -17,6 +17,7 @@ import { sleep } from '@/services/ton/provider'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
 import { HiArrowSmRight } from 'react-icons/hi'
 import Link from 'next/link'
+import Head from 'next/head'
 
 const { Text, Paragraph, Title } = Typography
 const { Lecture } = wrapper
@@ -82,8 +83,6 @@ const LecturePage = () => {
 			key: 'paymentProcess',
 		})
 
-		
-
 		try {
 			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(data.contractAddress)))
 			await lectureContract.sendPay(provider.sender(), toNano(amount.toString()))
@@ -129,6 +128,11 @@ const LecturePage = () => {
 
 	return (
 		<>
+			<Head>
+				<title>{data?.title}</title>
+				<meta property="og:title" content={data?.title} key="title" />
+				<meta property="description" content={data?.description} key="description" />
+			</Head>
 			{contextHolder}
 			<Typography>
 				<Title style={{ marginBottom: 0 }}>{data.title}</Title>
@@ -171,7 +175,7 @@ const LecturePage = () => {
 								)}
 								{['implementation', 'completing', 'run-up'].includes(data.stage) && (
 									<Col>
-										<Link href={data.link} target='_blank'>
+										<Link href={data.link} target="_blank">
 											<Button type="primary" size="large">
 												Go to lecture <HiArrowSmRight style={{ height: 16, position: 'relative', top: 3 }} />
 											</Button>
