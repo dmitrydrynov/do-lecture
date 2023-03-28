@@ -82,6 +82,8 @@ const LecturePage = () => {
 			key: 'paymentProcess',
 		})
 
+		
+
 		try {
 			const lectureContract = await provider.open(Lecture.createFromAddress(Address.parse(data.contractAddress)))
 			await lectureContract.sendPay(provider.sender(), toNano(amount.toString()))

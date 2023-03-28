@@ -33,7 +33,7 @@ export const ReadyLecturesList = () => {
 				title: 'Lectures',
 				// width: screens.xs ? '100%' : '40%',
 				render: (title: string, data: any) => {
-					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
+					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm a')
 
 					return (
 						<>
@@ -56,7 +56,7 @@ export const ReadyLecturesList = () => {
 				title: 'When',
 				render: (date: string) => {
 					const endsIn = dayjs(date).fromNow(true)
-					const parsedDate = dayjs(date).format('D MMM YYYY [at] hh:mm')
+					const parsedDate = dayjs(date).format('D MMM YYYY [at] hh:mm a')
 
 					return (
 						<>

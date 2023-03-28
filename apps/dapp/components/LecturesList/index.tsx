@@ -34,7 +34,7 @@ export const LecturesList = () => {
 				title: 'Lectures',
 				width: !screens.md ? '100%' : '40%',
 				render: (title: string, data: any) => {
-					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
+					const parsedDate = dayjs(data.date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm a')
 
 					return (
 						<>
@@ -66,7 +66,7 @@ export const LecturesList = () => {
 				title: 'Funding ends in',
 				render: (date: string) => {
 					const endsIn = dayjs(date).subtract(2, 'hours').fromNow(true)
-					const parsedDate = dayjs(date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm')
+					const parsedDate = dayjs(date).subtract(2, 'hours').format('D MMM YYYY [at] hh:mm a')
 
 					return (
 						<>
