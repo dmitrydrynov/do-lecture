@@ -31,7 +31,7 @@ export const SelectWalletModal = ({ open, onClose }: any) => {
 			})
 
 			if (isMobile()) {
-				openLink(addReturnStrategy(universalLink, 'back'), '_blank')
+				openLink(addReturnStrategy(universalLink, 'none'), '_blank')
 			} else {
 				setUniversalLink(universalLink)
 			}

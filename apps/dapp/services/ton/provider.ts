@@ -138,7 +138,7 @@ export class TonConnectProvider {
 			address: this.connector.account ? Address.parseRaw(this.connector.account.address) : undefined,
 			send: async (args: SenderArguments) => {
 				if (['iphone', 'ipad', 'android'].includes(this.connector.wallet?.device?.platform || '') && this.universalLink) {
-					openLink(addReturnStrategy(this.universalLink, 'back'), '_blank')
+					openLink(addReturnStrategy(this.universalLink, 'none'), '_blank')
 				}
 
 				try {
