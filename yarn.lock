@@ -5666,6 +5666,13 @@ react-qrcode-logo@^2.8.0:
     lodash.isequal "^4.5.0"
     qrcode-generator "^1.4.1"
 
+react-telegram-auth@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/react-telegram-auth/-/react-telegram-auth-1.0.4.tgz#76443a3930497de7ab03a24d791e03aeeac47a5c"
+  integrity sha512-S/yddONhaCW0LoaMIr9gaeaKrXZz4bPMFEHVmlTPJneVlA57qi1yomr6Q41mKhUCfwO3p0GWYgBN62J0A2IKYQ==
+  dependencies:
+    react "18.2.0"
+
 react@18.2.0, react@^18.0.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"

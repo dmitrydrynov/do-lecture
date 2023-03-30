@@ -46,9 +46,14 @@ export const AppHeader = () => {
 						{screens.md ? (
 							<>
 								{connector?.connected && (
-									<Link href="/my/lectures" style={{ marginRight: '10px' }}>
-										<Button type="text">My Lectures</Button>
-									</Link>
+									<>
+										<Link href="/my/lectures" style={{ marginRight: '10px' }}>
+											<Button type="text">My Lectures</Button>
+										</Link>
+										<Link href="/my/communities" style={{ marginRight: '10px' }}>
+											<Button type="text">My Communities</Button>
+										</Link>
+									</>
 								)}
 								<AuthButton onChange={handleChangeMobileAuthButton} />
 							</>
@@ -76,6 +81,11 @@ export const AppHeader = () => {
 								key: '',
 								label: 'My Lectures',
 								onClick: () => router.push('/my/lectures'),
+							},
+							{
+								key: '',
+								label: 'My Communities',
+								onClick: () => router.push('/my/communities'),
 							},
 						]}
 					/>
