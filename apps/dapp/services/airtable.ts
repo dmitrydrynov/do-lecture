@@ -1,5 +1,10 @@
 import Airtable, { FieldSet, Record as AirtableRecord } from 'airtable'
 import dayjs from 'dayjs'
+import { TUser } from 'react-telegram-auth'
+
+const parseAirtableRecord = (record: AirtableRecord<FieldSet>): { id: string; [key: string]: any } => {
+	return { id: record.id, ...record.fields }
+}
 
 const AirtableService = new Airtable({
 	apiKey: process.env.AIRTABLE_API_KEY,
@@ -94,11 +99,23 @@ export const getPaidLecturesByUser = async (userId: string, status: string[] = [
 	}
 }
 
-export const getLecturesByStage = async (stage: string[]) => {
+export const getLecturesByStage = async (stage: string[], communityName?: string) => {
 	try {
+		let community: any = undefined
+
+		if (communityName) {
+			community = await AirtableService('Community')
+				.select({ filterByFormula: `name = "${communityName}"`, fields: [] })
+				.all()
+
+			if (!community?.length) return []
+		}
+
 		const list = await AirtableService('Lecture')
 			.select({
-				filterByFormula: `AND(status = "published", FIND(stage, "${stage.join(' ')}"))`,
+				filterByFormula: community?.length
+					? `AND(status = "published", FIND(stage, "${stage.join(' ')}"), community = "${community[0].id}")`
+					: `AND(status = "published", FIND(stage, "${stage.join(' ')}"))`,
 				maxRecords: 200,
 				sort: [{ field: 'date', direction: 'asc' }],
 			})
@@ -160,12 +177,6 @@ export const getLecture = async (id: string) => {
 	return parseAirtableRecord(lecture)
 }
 
-export const getCommunity = async (id: string) => {
-	const community = await AirtableService('Community').find(id)
-
-	return parseAirtableRecord(community)
-}
-
 export const getSettings = async () => {
 	const settings = await AirtableService('Settings').select().all()
 	let response: Record<string, string> = {}
@@ -180,6 +191,22 @@ export const getSettings = async () => {
 	return Object.entries(response).length > 0 ? response : null
 }
 
-const parseAirtableRecord = (record: AirtableRecord<FieldSet>): { id: string; [key: string]: any } => {
-	return { id: record.id, ...record.fields }
+export const getCommunity = async (id: string) => {
+	const community = await AirtableService('Community').find(id)
+
+	return parseAirtableRecord(community)
+}
+
+export const getCommunityByName = async (name: string) => {
+	const [community] = await AirtableService('Community')
+		.select({ filterByFormula: `name = "${name}"` })
+		.all()
+
+	return parseAirtableRecord(community)
+}
+
+export const getAvaibleCommunities = async () => {
+	const communities = await AirtableService('Community').select({ filterByFormula: 'status = "enabled"' }).all()
+
+	return communities?.map((comm: any) => parseAirtableRecord(comm))
 }

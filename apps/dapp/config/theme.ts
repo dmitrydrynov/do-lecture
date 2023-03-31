@@ -1,5 +1,5 @@
 import { ThemeConfig, theme } from 'antd'
-import { Murecho as AppFont } from 'next/font/google'
+import { Rubik as AppFont } from 'next/font/google'
 
 const mainFont = AppFont({ weight: ['400'], subsets: ['latin', 'cyrillic'] })
 
@@ -47,6 +47,7 @@ export const appTheme: ThemeConfig = {
 export const defaultTheme: ThemeConfig = {
 	algorithm: theme.darkAlgorithm,
 	token: {
+		fontFamily: mainFont.style.fontFamily,
 		borderRadius: 12,
 		colorPrimary: '#25d9b3',
 		colorBgMask: 'rgba(0, 0, 0, 0.75)',
@@ -55,7 +56,7 @@ export const defaultTheme: ThemeConfig = {
 		colorBgLayout: '#1a2026',
 		colorBorder: '#3c4a58',
 		colorBorderSecondary: '#2a333c',
-		fontSize: 15,
+		fontSize: 16,
 		wireframe: false,
 	},
 	components: {

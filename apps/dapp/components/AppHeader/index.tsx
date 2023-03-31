@@ -45,13 +45,13 @@ export const AppHeader = () => {
 					<Space>
 						{screens.md ? (
 							<>
+								<Link href="/communities" style={{ marginRight: '10px' }}>
+									<Button type="text">Communities</Button>
+								</Link>
 								{connector?.connected && (
 									<>
 										<Link href="/my/lectures" style={{ marginRight: '10px' }}>
 											<Button type="text">My Lectures</Button>
-										</Link>
-										<Link href="/my/communities" style={{ marginRight: '10px' }}>
-											<Button type="text">My Communities</Button>
 										</Link>
 									</>
 								)}
@@ -69,7 +69,7 @@ export const AppHeader = () => {
 				</Col>
 			</Row>
 			<Drawer title="Main menu" width="100%" onClose={() => setMobileMenuIsOpen(false)} open={mobileMenuIsOpen} extra={<AuthButton onChange={handleChangeMobileAuthButton} />}>
-				{connector?.connected && (
+				{connector?.connected ? (
 					<Menu
 						mode="vertical"
 						style={{ background: 'transparent' }}
@@ -79,13 +79,28 @@ export const AppHeader = () => {
 						items={[
 							{
 								key: '',
-								label: 'My Lectures',
-								onClick: () => router.push('/my/lectures'),
+								label: 'Communities',
+								onClick: () => router.push('/communities'),
 							},
 							{
 								key: '',
-								label: 'My Communities',
-								onClick: () => router.push('/my/communities'),
+								label: 'My Lectures',
+								onClick: () => router.push('/my/lectures'),
+							},
+						]}
+					/>
+				) : (
+					<Menu
+						mode="vertical"
+						style={{ background: 'transparent' }}
+						selectedKeys={[]}
+						selectable={false}
+						onClick={() => setMobileMenuIsOpen(false)}
+						items={[
+							{
+								key: '',
+								label: 'Communities',
+								onClick: () => router.push('/communities'),
 							},
 						]}
 					/>

@@ -7,8 +7,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 	try {
 		if (req.method !== 'POST') return res.status(503).end()
 
+		const { community } = req.body
 		const response: any[] = []
-		let lectures = await getLecturesByStage(['funding'])
+		let lectures = await getLecturesByStage(['funding'], community)
 
 		if (lectures.length > 0) {
 			for (const l of lectures) {

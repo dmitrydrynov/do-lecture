@@ -15,6 +15,7 @@ import { Address, toNano } from 'ton'
 import styles from './style.module.css'
 import { TonScanSvg } from '../icons/TonScanSvg'
 import { renderPrice } from '@/helpers/utils'
+import Link from 'next/link'
 
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 
@@ -194,9 +195,14 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 				return (
 					<Space>
 						{!!record.contractAddress && (
-							<Button type="text" shape="circle" onClick={() => handleDirectToTonScan(record.contractAddress)}>
-								<Icon component={TonScanSvg} style={{ margin: 0, scale: '1.5', color: '#aaa' }} />
-							</Button>
+							<>
+								<Button type="text" shape="circle" onClick={() => handleDirectToTonScan(record.contractAddress)}>
+									<Icon component={TonScanSvg} style={{ margin: 0, scale: '1.5', color: '#aaa' }} />
+								</Button>
+								<Link href={`/lecture/${record.id}`} target="_blank">
+									<Button>View</Button>
+								</Link>
+							</>
 						)}
 						{record.meta.state == 'active' && (
 							<>
@@ -217,7 +223,6 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 
 	const handleChangeFilterStatus = async (value: string | number) => {
 		setFilterStatus(value.toString())
-		// await refetchLectures()
 	}
 
 	return (
@@ -239,54 +244,6 @@ export const MyLectures = ({ forceUpdate = false, onUpdate = () => {} }: any) =>
 			<Table className={styles.table} dataSource={data} columns={columns} pagination={false} loading={isLoading} />
 
 			<LectureModal open={!!lectureForEdit} lectureId={lectureForEdit?.id} onFinish={handleSaveLecture} onCancel={() => setLectureForEdit(undefined)} />
-			{/* <List
-				loading={isLoading}
-				bordered
-				dataSource={data}
-				renderItem={(lecture: any, key: number) => (
-					<List.Item
-						key={key}
-						actions={[
-							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
-								Опубликовать
-							</Button>,
-							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
-								Редактировать
-							</Button>,
-							<Button key="cancel-lecture" onClick={() => handleCancelLecture(lecture)}>
-								Удалить
-							</Button>,
-						]}
-					>
-						<List.Item.Meta
-							title={
-								<>
-									{lecture.status == 'published' && <HeartTwoTone twoToneColor={lecture.meta?.state == 'active' ? 'lightgreen' : 'red'} />} {lecture.title} ({renderPrice(lecture.meta?.paidTotal, 'decimal')} из{' '}
-									{renderPrice(lecture.meta?.goal)})
-									{lecture.status == 'published' && <Progress percent={calculateProgress(lecture)} strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />}
-								</>
-							}
-							description={
-								lecture.status == 'published' && (
-									<>
-										<Typography.Paragraph
-											copyable={{
-												icon: <Icon component={TonScanSvg} style={{ scale: '1.5', color: '#aaa' }} />,
-												tooltips: ['See on tonscan.org'],
-												onCopy: () => {
-													window.open(`https://${network == 'testnet' ? 'testnet.' : ''}tonscan.org/address/${lecture.contractAddress}`, '_blank')
-												},
-											}}
-										>
-											{lecture.contractAddress}
-										</Typography.Paragraph>
-									</>
-								)
-							}
-						/>
-					</List.Item>
-				)}
-			/> */}
 		</>
 	)
 }

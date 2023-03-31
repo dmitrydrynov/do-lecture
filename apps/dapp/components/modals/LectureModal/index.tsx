@@ -1,8 +1,8 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { SettingsContext } from '@/contexts/settings'
 import { fetcher } from '@/helpers/fetcher'
 import { TonContext } from '@/services/ton/context'
-import { Alert, Button, Col, DatePicker, Form, Input, InputNumber, message, Modal, Row, Spin, TimePicker, Typography } from 'antd'
+import { Alert, Button, Col, DatePicker, Form, Input, InputNumber, message, Modal, Row, Select, Spin, TimePicker, Typography } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import dayjs, { Dayjs } from 'dayjs'
 import { code, wrapper } from 'lecture-contract'
@@ -27,9 +27,10 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 	const settings = useContext(SettingsContext)
 	const [formData, setFormData] = useState<any>()
 	const [creating, setCreating] = useState(false)
+	const [selectedCommunityId, setSelectedCommunityId] = useState<string>()
 	const [messageApi, contextHolder] = message.useMessage()
 	const { data: rate } = useSWR(['/api/rates', { coins: formData?.price || 10 }], fetcher)
-	const { data: community } = useSWR(['/api/community', {}], fetcher)
+	const { data: communities } = useSWR(['/api/communities/list', {}], fetcher)
 	const { data: lectureData, isLoading: loadingData } = useSWR(!!lectureId && ['/api/lecture/get', { id: lectureId }], fetcher)
 	const { trigger: saveLecture, isMutating: newLectureAdding }: SWRMutationResponse<any, any, any> = useSWRMutation('/api/lecture/save', (url, { arg }: any) => fetcher([url, arg]))
 
@@ -43,15 +44,17 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 		if (open) {
 			form.resetFields()
 			form.setFieldsValue({ price: 10, duration: 30 })
+			setSelectedCommunityId(undefined)
 		}
 	}, [open])
 
-	const valuesForNewRecord = useMemo(() => ({ duration: 30, community: community?.id }), [community])
+	const valuesForNewRecord = useMemo(() => ({ duration: 30, community: undefined }), [])
 
 	useEffect(() => {
 		if (!lectureData) return
 
 		form.setFieldsValue({ ...lectureData, date: dayjs(lectureData.date), time: dayjs(lectureData.date) })
+		setSelectedCommunityId(lectureData.community[0])
 		setFormData(form.getFieldsValue())
 	}, [lectureData])
 
@@ -79,7 +82,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 						duration: Number.parseInt(data.duration) * 60,
 						goal: toNano(data.price.toString()),
 						serviceAddress: Address.parse(settings.serviceWallet),
-						managerAddress: Address.parse(community.managerAddress),
+						managerAddress: Address.parse(communities.find((comm: any) => comm.id == selectedCommunityId)?.managerAddress),
 						lecturerAddress: Address.parse(userWallet.account.address),
 					},
 					initCode
@@ -145,6 +148,14 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 		setCreating(true)
 
 		try {
+			if (!selectedCommunityId) {
+				messageApi.error('You should select a community')
+				setCreating(false)
+				return
+			} else {
+				form.setFieldValue('community', selectedCommunityId)
+			}
+
 			const { date, time, ...data } = await form.validateFields()
 			const startTime = date.set('hour', time.hour()).set('minute', time.minute()).set('second', 0)
 
@@ -167,6 +178,13 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 	}
 
 	const showDeployConfirm = async (record: any) => {
+		if (!selectedCommunityId) {
+			messageApi.error('You should select a community')
+			return
+		} else {
+			form.setFieldValue('community', selectedCommunityId)
+		}
+
 		await form.validateFields()
 		modal.confirm({
 			type: 'info',
@@ -190,6 +208,11 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 			onOk: publishLecture,
 		})
 	}
+
+	const communityOptions: any = communities?.map((comm: any) => ({
+		label: comm.title,
+		value: comm.id,
+	}))
 
 	return (
 		<>
@@ -219,7 +242,21 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 							{lectureId ? 'Edit lecture' : 'New lecture'}
 						</Title>
 						<Text type="secondary" style={{ fontWeight: 'normal' }}>
-							for {community?.name}
+							<Row align="middle" wrap={false}>
+								<Col>for {!!lectureId && communities.find((comm: any) => comm.id == selectedCommunityId).title}</Col>
+								<Col flex={1}>
+									{!lectureId && (
+										<Select
+											value={selectedCommunityId}
+											options={communityOptions}
+											onSelect={(value?: string) => setSelectedCommunityId(value)}
+											style={{ width: '100%' }}
+											bordered={false}
+											placeholder="Select a community before"
+										/>
+									)}
+								</Col>
+							</Row>
 						</Text>
 					</>
 				}
@@ -245,7 +282,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 						<Row gutter={[16, 16]}>
 							<Col>
 								<Form.Item name="date" label="Date" rules={[{ required: true }]}>
-									<DatePicker /*disabledDate={disabledDate}*/ format="DD.MM.YYYY" />
+									<DatePicker disabledDate={disabledDate} format="DD.MM.YYYY" />
 								</Form.Item>
 							</Col>
 							<Col>
@@ -255,7 +292,7 @@ export const LectureModal = ({ open, lectureId, onFinish, onCancel }: LectureMod
 										disabled={!formData?.date}
 										format="HH:mm"
 										minuteStep={30}
-										// disabledTime={disabledTime}
+										disabledTime={disabledTime}
 										showNow={false}
 									/>
 								</Form.Item>

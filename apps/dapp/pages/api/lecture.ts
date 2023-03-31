@@ -21,7 +21,8 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 			const contract = await initLectureContract(address)
 
 			if (!contract) {
-				throw new Error('Not found the lecture contract')
+				// throw new Error('Not found the lecture contract')
+				return res.status(200).json({ ...lecture, meta: undefined })
 			}
 
 			const meta = await contract.getData()

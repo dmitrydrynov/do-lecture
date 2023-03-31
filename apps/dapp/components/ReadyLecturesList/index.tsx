@@ -10,10 +10,10 @@ import styles from './style.module.css'
 
 const { Text, Title } = Typography
 
-export const ReadyLecturesList = () => {
+export const ReadyLecturesList = ({ community }: any) => {
 	const route = useRouter()
 	const screens = Grid.useBreakpoint()
-	const { data, isLoading } = useSWR(['/api/lectures/ready'], fetcher, {
+	const { data, isLoading } = useSWR(['/api/lectures/ready', { community }], fetcher, {
 		refreshInterval: 10000,
 	})
 
@@ -40,7 +40,7 @@ export const ReadyLecturesList = () => {
 							<Text>{title}</Text>
 							<br />
 							<Text type="secondary">
-								<small>in {data.communityName}</small>
+								<small>in {data.communityTitle}</small>
 							</Text>
 							<br />
 							{!screens.md && <Text type="secondary">Start at {parsedDate}</Text>}

@@ -11,10 +11,10 @@ import styles from './style.module.css'
 
 const { Text, Title } = Typography
 
-export const LecturesList = () => {
+export const LecturesList = ({ community }: any) => {
 	const route = useRouter()
 	const screens = Grid.useBreakpoint()
-	const { data, isLoading } = useSWR(['/api/lectures/funding'], fetcher, {
+	const { data, isLoading } = useSWR(['/api/lectures/funding', { community }], fetcher, {
 		refreshInterval: 10000,
 	})
 
@@ -41,7 +41,7 @@ export const LecturesList = () => {
 							<Text>{title}</Text>
 							<br />
 							<Text type="secondary">
-								<small>in {data.communityName}</small>
+								<small>in {data.communityTitle}</small>
 							</Text>
 							<br />
 							{!screens.md && <Text type="secondary">Funding ends in {parsedDate}</Text>}
@@ -85,8 +85,6 @@ export const LecturesList = () => {
 		],
 		[screens]
 	)
-
-	if (!data?.length) return null
 
 	return (
 		<>
