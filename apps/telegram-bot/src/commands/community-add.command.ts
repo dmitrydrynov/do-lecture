@@ -11,19 +11,24 @@ export class CommunityAddCommand extends Command {
   }
 
   handle(): void {
-    this.bot.command("communityAdd", (ctx) => {
+    this.bot.command("community_add", (ctx) => {
       ctx.reply(
-        "text",
+        "To connect your community, please click on the button below.",
         Markup.keyboard(
           [
-            Markup.button.groupRequest("Select group", 1, {
+            Markup.button.groupRequest("Connect my community", 1, {
               chat_is_created: true,
             }),
           ],
           {
             columns: 2,
           }
-        ),
+        )
+          .placeholder(
+            "To connect your community, please click on the button below."
+          )
+          .resize(true)
+          .oneTime()
       );
     });
 
@@ -31,7 +36,13 @@ export class CommunityAddCommand extends Command {
       // ctx.session.courseLike = true;
       // ctx.editMessageText("Cool!");
       console.log(ctx);
-      ctx.reply("Hm");
+      ctx.reply(
+        "Successful! You community connected. Now you can set a manager and share the first lecture after that.",
+        Markup.inlineKeyboard([
+          Markup.button.callback("Button 1", "data"),
+          Markup.button.login("Login", "https://delecture.vercel.app"),
+        ])
+      );
     });
 
     // this.bot.action("course_dislike", (ctx) => {

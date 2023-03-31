@@ -1,6 +1,7 @@
 import { Markup, Telegraf } from "telegraf";
 import { Command } from "./command.class";
 import { IBotContext } from "../context/context.interface";
+import { message } from "telegraf/filters";
 
 export class StartCommand extends Command {
   name = "Start";
@@ -11,8 +12,9 @@ export class StartCommand extends Command {
 
   handle(): void {
     this.bot.start((ctx) => {
+      ctx.setChatMenuButton
       ctx.reply(
-        "Welcome! Let's try to work together ;)"
+        "Welcome! Let's try to work together ;)",
         // Markup.inlineKeyboard([
         //   Markup.button.callback("Like", "course_like"),
         //   Markup.button.callback("Dislike", "course_dislike"),
