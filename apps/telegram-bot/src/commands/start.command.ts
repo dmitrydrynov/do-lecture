@@ -1,7 +1,8 @@
 import { Markup, Telegraf } from "telegraf";
+import { type Update } from "typegram/update";
 import { Command } from "./command.class";
 import { IBotContext } from "../context/context.interface";
-import { message } from "telegraf/filters";
+import { either, message } from "telegraf/filters";
 
 export class StartCommand extends Command {
   name = "Start";
@@ -12,15 +13,19 @@ export class StartCommand extends Command {
 
   handle(): void {
     this.bot.start((ctx) => {
-      ctx.setChatMenuButton
       ctx.reply(
-        "Welcome! Let's try to work together ;)",
+        "Welcome! Let's try to work together ;)"
         // Markup.inlineKeyboard([
         //   Markup.button.callback("Like", "course_like"),
         //   Markup.button.callback("Dislike", "course_dislike"),
         // ])
       );
     });
+
+    // this.bot.use((ctx, next) => {
+    //   console.log(ctx);
+    //   return next();
+    // });
 
     // this.bot.action("course_like", (ctx) => {
     //   ctx.session.courseLike = true;
