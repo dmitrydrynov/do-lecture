@@ -210,3 +210,29 @@ export const getAvaibleCommunities = async () => {
 
 	return communities?.map((comm: any) => parseAirtableRecord(comm))
 }
+
+export const checkUserProfile = async (userId: string) => {
+	const profile = await AirtableService('Profile')
+		.select({
+			fields: [],
+			filterByFormula: `AND(userId = "${userId}", status = "enabled", fullName, speciality, experience)`,
+		})
+		.all()
+
+	return profile?.length > 0
+}
+
+export const getUserProfile = async (userId: string) => {
+	try {
+		const [profile] = await AirtableService('Profile')
+			.select({
+				filterByFormula: `userId = "${userId}"`,
+			})
+			.all()
+
+		return parseAirtableRecord(profile)
+	} catch (error: any) {
+		console.error('[AIRTABLE ERROR]', error)
+		throw error
+	}
+}

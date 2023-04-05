@@ -53,6 +53,10 @@ export const AppHeader = () => {
 										<Link href="/my/lectures" style={{ marginRight: '10px' }}>
 											<Button type="text">My Lectures</Button>
 										</Link>
+
+										<Link href="/my/profile" style={{ marginRight: '10px' }}>
+											<Button type="text">My Profile</Button>
+										</Link>
 									</>
 								)}
 								<AuthButton onChange={handleChangeMobileAuthButton} />
@@ -86,6 +90,11 @@ export const AppHeader = () => {
 								key: '',
 								label: 'My Lectures',
 								onClick: () => router.push('/my/lectures'),
+							},
+							{
+								key: '',
+								label: 'My Profile',
+								onClick: () => router.push('/my/profile'),
 							},
 						]}
 					/>

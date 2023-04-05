@@ -7,14 +7,22 @@ import { Button, Col, Row, Space, Typography } from 'antd'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { HiPlusSm } from 'react-icons/hi'
+import useSWR from 'swr'
+import { fetcher } from '@/helpers/fetcher'
+import Link from 'next/link'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 
 const MyLecturesPage = ({ user }: any) => {
 	const { connector } = useContext(TonContext)
 	const [lectureModalOpen, setLectureModalOpen] = useState(false)
 	const [lectureAdded, setLectureAdded] = useState(false)
+	const { data: hasProfile, mutate: checkProfile } = useSWR(connector?.connected ? ['/api/my/profile/check'] : null, fetcher, {
+		refreshInterval: 0,
+		revalidateOnFocus: false,
+		revalidateOnMount: true,
+	})
 
 	const handleAddLecture = () => {
 		setLectureModalOpen(false)
@@ -34,18 +42,29 @@ const MyLecturesPage = ({ user }: any) => {
 								<Title>My lectures</Title>
 							</Col>
 							<Col>
-								<Button type="primary" onClick={() => setLectureModalOpen(true)}>
-									<Space align="center">
-										<HiPlusSm style={{ display: 'block' }} />
-										Add new
-									</Space>
-								</Button>
+								{hasProfile && (
+									<Button type="primary" onClick={() => setLectureModalOpen(true)}>
+										<Space align="center">
+											<HiPlusSm style={{ display: 'block' }} />
+											Add new
+										</Space>
+									</Button>
+								)}
 							</Col>
 						</Row>
 
-						<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
+						{!hasProfile && (
+							<Text>
+								To organize your lectures, you first need to fill out your profile. Go to <Link href="/my/profile">Profile page</Link> and do it.
+							</Text>
+						)}
 
-						<LectureModal open={lectureModalOpen} onFinish={handleAddLecture} onCancel={() => setLectureModalOpen(false)} />
+						{hasProfile && (
+							<>
+								<MyLectures forceUpdate={lectureAdded} onUpdate={() => setLectureAdded(false)} />
+								<LectureModal open={lectureModalOpen} onFinish={handleAddLecture} onCancel={() => setLectureModalOpen(false)} />
+							</>
+						)}
 					</Space>
 				)}
 			</main>

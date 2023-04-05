@@ -33,4 +33,4 @@ yarn-error.log*
 # turbo
 .turbo
 
-public/tonconnect-manifest.json
+tonconnect-manifest.json
