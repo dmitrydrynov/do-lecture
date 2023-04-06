@@ -6,6 +6,7 @@ import styles from './style.module.css'
 import { AuthButton } from '../AuthButton'
 import { HiMenu } from 'react-icons/hi'
 import { useRouter } from 'next/router'
+import { TelegramLogin } from '../TelegramLogin'
 
 const { Header } = Layout
 
@@ -59,6 +60,7 @@ export const AppHeader = () => {
 										</Link>
 									</>
 								)}
+								<TelegramLogin />
 								<AuthButton onChange={handleChangeMobileAuthButton} />
 							</>
 						) : (

@@ -6,7 +6,19 @@ import { TonContext } from '@/services/ton/context'
 import { DownOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Modal, Row, Space, Typography } from 'antd'
 import { QRCode } from 'react-qrcode-logo'
-import styles from './style.module.css'
+import styles from './style.module.scss'
+import { TLoginButton, TLoginButtonSize } from 'react-telegram-auth'
+import { TelegramLogin } from '../TelegramLogin'
+
+type TelegramUser = Readonly<{
+	auth_date: number
+	first_name: string
+	last_name?: string | undefined
+	hash: string
+	id: number
+	photo_url?: string | undefined
+	username?: string | undefined
+}>
 
 const { Text, Paragraph } = Typography
 
@@ -15,6 +27,7 @@ export const AuthButton = ({ onChange = () => {} }: any) => {
 	const [selectWalletModal, setSelectWalletModal] = useState(false)
 	// const [universalLink, setUniversalLink] = useState('')
 	const [selectedWallet, setSelectedWallet] = useState<any>()
+	const [telegramUser, setTelegramUser] = useState<TelegramUser>()
 
 	const address = useSlicedAddress(userWallet?.account.address, network)
 
@@ -68,28 +81,26 @@ export const AuthButton = ({ onChange = () => {} }: any) => {
 		<>
 			<div className="auth-button" style={{ display: 'flex', justifyContent: 'flex-end' }}>
 				{userWallet ? (
-					<Space>
-						<Dropdown
-							menu={{
-								onClick: handleDisconnect,
-								items: [
-									{
-										label: 'Disconnect',
-										key: '1',
-									},
-								],
-							}}
-						>
-							<Button type="primary" size="large">
-								<Space>
-									{address}
-									<DownOutlined />
-								</Space>
-							</Button>
-						</Dropdown>
-					</Space>
+					<Dropdown
+						menu={{
+							onClick: handleDisconnect,
+							items: [
+								{
+									label: 'Disconnect',
+									key: '1',
+								},
+							],
+						}}
+					>
+						<Button type="primary" size="large">
+							<Space>
+								{address}
+								<DownOutlined />
+							</Space>
+						</Button>
+					</Dropdown>
 				) : (
-					<Button type="primary" size="large" onClick={() => setSelectWalletModal(true)}>
+					<Button type="primary" size="large" onClick={() => setSelectWalletModal(true)} className={styles.authButton} icon={<span className="icon-app icon-app-ton"></span>}>
 						Connect TON
 					</Button>
 				)}

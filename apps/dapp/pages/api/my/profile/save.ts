@@ -1,4 +1,4 @@
-import { checkUserProfile } from '@/services/airtable'
+import { saveUserProfile } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton/provider'
 import { sessionOptions } from 'config/sessions'
 import { withIronSessionApiRoute } from 'iron-session/next'
@@ -10,11 +10,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		if (req.method !== 'POST' || !req.session.user?.id) return res.status(503).end()
 
-		let hasProfile = await checkUserProfile(req.session.user.id)
+		await saveUserProfile(req.session.user.id, req.body)
 
-		res.status(200).json(hasProfile)
+		return res.status(200).end()
 	} catch (error: any) {
 		console.error(error)
-		res.status(502).json({ error: error.message || 'Something wrong' })
+		return res.status(502).json({ error: error.message || 'Something wrong' })
 	}
 }

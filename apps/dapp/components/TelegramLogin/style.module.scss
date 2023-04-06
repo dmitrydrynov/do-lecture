@@ -1,0 +1,22 @@
+.telegramButton {
+  background-color: #273138;
+  border-color: transparent;
+
+  &:hover,
+  &:active,
+  &:focus,
+  &:focus-visible {
+    background-color: #33424c !important;
+    outline: none !important;
+  }
+
+  :global {
+    .icon-app-telegram {
+      width: 17px;
+      height: 18px;
+      background-image: var(--image-url-connect-telegram);
+      margin-right: 8px;
+      margin-left: -1px;
+    }
+  }
+}

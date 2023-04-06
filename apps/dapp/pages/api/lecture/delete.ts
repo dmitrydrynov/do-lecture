@@ -1,10 +1,14 @@
 import { deleteDraftLecture } from '@/services/airtable'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { withIronSessionApiRoute } from 'iron-session/next'
+import { sessionOptions } from 'config/sessions'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(handler, sessionOptions)
+
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		const { id } = req.body
-		if (req.method !== 'POST' || !id) return res.status(503).end()
+		if (req.method !== 'POST' || !id || !req.session.user?.id) return res.status(503).end()
 
 		await deleteDraftLecture(id)
 

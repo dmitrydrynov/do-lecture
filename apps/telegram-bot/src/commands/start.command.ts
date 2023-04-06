@@ -14,7 +14,14 @@ export class StartCommand extends Command {
   handle(): void {
     this.bot.start((ctx) => {
       ctx.reply(
-        "Welcome! Let's try to work together ;)"
+        "Welcome! Let's try to work together ;)",
+        Markup.inlineKeyboard([
+          Markup.button.login(
+            "Login",
+            "https://ad39-87-252-254-0.eu.ngrok.io",
+            { request_write_access: true }
+          ),
+        ])
         // Markup.inlineKeyboard([
         //   Markup.button.callback("Like", "course_like"),
         //   Markup.button.callback("Dislike", "course_dislike"),

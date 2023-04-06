@@ -1,6 +1,6 @@
 import { getLecture } from '@/services/airtable'
 import { initLectureContract } from '@/services/ton/provider'
-import { defaultCookie } from 'config/cookie'
+import { sessionOptions } from 'config/sessions'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
@@ -46,4 +46,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 	} catch (error: any) {
 		res.status(502).json({ error: error.message || 'Something wrong' })
 	}
-}, defaultCookie)
+}, sessionOptions)

@@ -44,6 +44,7 @@
     "react-qr-code": "^2.0.11",
     "react-qrcode-logo": "^2.8.0",
     "react-telegram-auth": "^1.0.4",
+    "sass": "^1.60.0",
     "swr": "^2.0.4",
     "ton": "^13.4.1",
     "ton-core": "^0.48.0",

@@ -1,9 +1,11 @@
 import { getCommunityByName } from '@/services/airtable'
-import { defaultCookie } from 'config/cookie'
+import { sessionOptions } from 'config/sessions'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(handler, sessionOptions)
+
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		const { name } = req.body
 		if (req.method !== 'POST' || !name) return res.status(503).end()
@@ -14,4 +16,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
 	} catch (error: any) {
 		res.status(502).json({ error })
 	}
-}, defaultCookie)
+}

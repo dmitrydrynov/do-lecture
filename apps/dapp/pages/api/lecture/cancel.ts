@@ -1,9 +1,13 @@
 import { cancelLecture } from '@/services/airtable'
+import { sessionOptions } from 'config/sessions'
+import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(handler, sessionOptions)
+
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
-		if (req.method !== 'POST') return res.status(503).end()
+		if (req.method !== 'POST' || !req.session.user?.id) return res.status(503).end()
 
 		const { id } = req.body
 

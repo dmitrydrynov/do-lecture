@@ -1,6 +1,5 @@
 import Airtable, { FieldSet, Record as AirtableRecord } from 'airtable'
 import dayjs from 'dayjs'
-import { TUser } from 'react-telegram-auth'
 
 const parseAirtableRecord = (record: AirtableRecord<FieldSet>): { id: string; [key: string]: any } => {
 	return { id: record.id, ...record.fields }
@@ -215,7 +214,7 @@ export const checkUserProfile = async (userId: string) => {
 	const profile = await AirtableService('Profile')
 		.select({
 			fields: [],
-			filterByFormula: `AND(userId = "${userId}", status = "enabled", fullName, speciality, experience)`,
+			filterByFormula: `AND(userId = "${userId}", fullName, speciality, experience)`,
 		})
 		.all()
 
@@ -230,7 +229,27 @@ export const getUserProfile = async (userId: string) => {
 			})
 			.all()
 
-		return parseAirtableRecord(profile)
+		return profile ? parseAirtableRecord(profile) : undefined
+	} catch (error: any) {
+		console.error('[AIRTABLE ERROR]', error)
+		throw error
+	}
+}
+
+export const saveUserProfile = async (userId: string, data: Record<string, any>) => {
+	try {
+		let [profile] = await AirtableService('Profile')
+			.select({ filterByFormula: `userId = "${userId}"` })
+			.all()
+
+		if (!profile) {
+			profile = await AirtableService('Profile').create({
+				user: [userId],
+				...data,
+			})
+		} else {
+			await profile.patchUpdate(data)
+		}
 	} catch (error: any) {
 		console.error('[AIRTABLE ERROR]', error)
 		throw error

@@ -15,3 +15,15 @@
   /* border: 2px solid rgb(212, 212, 212); */
   background-color: #121212;
 }
+
+.authButton {
+  :global {
+    .icon-app-ton {
+      width: 17px;
+      height: 18px;
+      background-image: var(--image-url-connect-ton);
+      margin-right: 8px;
+      margin-left: -1px;
+    }
+  }
+}

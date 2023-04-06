@@ -1,12 +1,16 @@
 import AirtableService from '@/services/airtable'
 import { getLectureData } from '@/services/ton/provider'
+import { sessionOptions } from 'config/sessions'
+import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(handler, sessionOptions)
+
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		const { lecturerId } = req.body
-		if (req.method !== 'POST' || !lecturerId) return res.status(503).end()
+		if (req.method !== 'POST' || !lecturerId || !req.session.user?.id) return res.status(503).end()
 
 		let lectures = await AirtableService('Lecture')
 			.select({

@@ -68,8 +68,6 @@ export const useTonContext = ({ onConnectError }: any) => {
 	}
 
 	const handleStatusChange = async (wallet?: any) => {
-		if (user) return
-
 		if (!wallet) {
 			setUserWallet(undefined)
 			return
