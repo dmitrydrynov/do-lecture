@@ -18,7 +18,7 @@ export class StartCommand extends Command {
         Markup.inlineKeyboard([
           Markup.button.login(
             "Login",
-            "https://ad39-87-252-254-0.eu.ngrok.io",
+            process.env.TELEGRAM_BOT_DOMAIN as string,
             { request_write_access: true }
           ),
         ])

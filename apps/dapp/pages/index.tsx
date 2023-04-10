@@ -5,6 +5,10 @@ import styles from '@/styles/Home.module.css'
 import { Space, Typography } from 'antd'
 import Head from 'next/head'
 import { ReadyLecturesList } from '@/components/ReadyLecturesList'
+import { withIronSessionSsr } from 'iron-session/next'
+import { sessionOptions } from 'config/sessions'
+import TelegramService from '@/services/telegram'
+import Api from '@/services/api'
 
 const { Title, Text } = Typography
 
@@ -27,5 +31,28 @@ const Home = () => {
 }
 
 Home.getLayout = (page: ReactElement) => <PublicLayout>{page}</PublicLayout>
+
+export const getServerSideProps = withIronSessionSsr(async function getServerSideProps({ req, query }) {
+	// const user = req.session.user;
+	if (query?.hash) {
+		const tgValidated = TelegramService.verifyAuthorization(query)
+
+		if (tgValidated) {
+			const user = await Api.loginByTelegram(query)
+
+			return {
+				props: {
+					user,
+				},
+			}
+		}
+	}
+
+	return {
+		props: {
+			// user: req.session.user,
+		},
+	}
+}, sessionOptions)
 
 export default Home

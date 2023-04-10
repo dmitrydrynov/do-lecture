@@ -2,34 +2,30 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getIronSession } from 'iron-session/edge'
 import { sessionOptions } from 'config/sessions'
+import Api from './services/api'
 
 export const middleware = async (req: NextRequest) => {
+	const { pathname, searchParams } = req.nextUrl.clone()
+	const params = Object.fromEntries(searchParams)
 	const res = NextResponse.next()
 	const session = await getIronSession(req, res, sessionOptions)
-
 	const { user } = session
 
-	// like mutate user:
-	// user.something = someOtherThing;
-	// or:
-	// session.user = someoneElse;
+	if (pathname == '/') {
+		const _user = await Api.loginByTelegram(params)
 
-	// uncomment next line to commit changes:
-	// await session.save();
-	// or maybe you want to destroy session:
-	// await session.destroy();
+		console.log('111', '_user')
+	}
 
-	console.log('from middleware', { user })
-
-	// demo:
-	if (!user?.id) {
-		// unauthorized to see pages inside admin/
-		return NextResponse.redirect(new URL('/', req.url)) // redirect to /unauthorized page
+	if (pathname.startsWith('/my')) {
+		if (!user?.id) {
+			return NextResponse.redirect(new URL('/', req.url)) // redirect to /unauthorized page
+		}
 	}
 
 	return res
 }
 
 export const config = {
-	matcher: '/my/:path*',
+	matcher: '/:path*',
 }

@@ -2,6 +2,9 @@
  * Docs page https://telegram-bot-sdk.readme.io/reference/sendmessage
  * Telegram Bot API Docs https://core.telegram.org/bots/api#formatting-options
  */
+import crypto from 'crypto'
+import dayjs from 'dayjs'
+
 export default class TelegramService {
 	private apiUrl: string
 
@@ -84,5 +87,26 @@ export default class TelegramService {
 		} catch (error: any) {
 			console.log(error)
 		}
+	}
+
+	static verifyAuthorization = (data: any) => {
+		if (dayjs().diff(dayjs(data.auth_date * 1000), 'milliseconds') > 86400000) {
+			throw Error('Authorization data is outdated')
+		}
+
+		const secretKey = crypto
+			.createHash('sha256')
+			.update(process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN as string)
+			.digest()
+
+		const dataCheckString = Object.keys(data)
+			.filter((key) => key !== 'hash')
+			.map((key) => `${key}=${data[key]}`)
+			.sort()
+			.join('\n')
+
+		const check_hash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+
+		return check_hash == data.hash
 	}
 }
