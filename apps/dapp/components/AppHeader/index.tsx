@@ -20,7 +20,7 @@ export const AppHeader = () => {
 		setMobileMenuIsOpen(false)
 	}, [screens])
 
-	const handleChangeMobileAuthButton = async () => {
+	const handleChangeAuthButton = async () => {
 		await router.push('/')
 		setMobileMenuIsOpen(false)
 	}
@@ -60,8 +60,8 @@ export const AppHeader = () => {
 										</Link>
 									</>
 								)}
-								<TelegramLogin />
-								<AuthButton onChange={handleChangeMobileAuthButton} />
+								<TelegramLogin onChange={handleChangeAuthButton} />
+								<AuthButton onChange={handleChangeAuthButton} />
 							</>
 						) : (
 							<Button
@@ -74,7 +74,7 @@ export const AppHeader = () => {
 					</Space>
 				</Col>
 			</Row>
-			<Drawer title="Main menu" width="100%" onClose={() => setMobileMenuIsOpen(false)} open={mobileMenuIsOpen} extra={<AuthButton onChange={handleChangeMobileAuthButton} />}>
+			<Drawer title="Main menu" width="100%" onClose={() => setMobileMenuIsOpen(false)} open={mobileMenuIsOpen} extra={<AuthButton onChange={handleChangeAuthButton} />}>
 				{connector?.connected ? (
 					<Menu
 						mode="vertical"

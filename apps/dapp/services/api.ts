@@ -27,7 +27,7 @@ export default class Api {
 			let user = await findUserByTelegramId(data.id)
 
 			if (!user) {
-				user = await createUser({ telegramId: data.id, telegramName: data.username })
+				user = await createUser({ telegramId: data.id, telegramName: data.first_name, telegramUsername: data.username, telegramPhoto: data.photo_url })
 			}
 
 			return user

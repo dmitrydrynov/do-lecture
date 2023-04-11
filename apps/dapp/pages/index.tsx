@@ -39,7 +39,10 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
 		const loggedUser = await Api.loginByTelegram(query)
 
 		if (loggedUser) {
-			req.session.user = { id: loggedUser.id, telegram: { username: loggedUser.telegramName, id: loggedUser.telegramId } }
+			req.session.user = {
+				id: loggedUser.id,
+				telegram: { username: loggedUser.telegramUsername, id: loggedUser.telegramId, firstName: loggedUser.telegramName, photoUrl: loggedUser.telegramPhoto },
+			}
 			await req.session.save()
 
 			return {

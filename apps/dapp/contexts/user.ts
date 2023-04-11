@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { createContext } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/helpers/fetcher'
+import { useRouter } from 'next/router'
 
 export type UserContextType = {
 	id?: string
@@ -14,7 +15,13 @@ export type UserContextType = {
 export const UserContext = createContext<UserContextType>({})
 
 export const useUserContext = () => {
-	const { data } = useSWR(['/api/auth/me'], fetcher, { revalidateOnFocus: false })
+	const router = useRouter()
+	const [user, setUser] = useState<any>()
+	const { data, mutate } = useSWR(['/api/auth/me'], fetcher, { revalidateOnFocus: false })
 
-	return data
+	useEffect(() => {
+		setUser(data)
+	}, [data])
+
+	return { user }
 }

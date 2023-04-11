@@ -9,7 +9,9 @@ export declare module 'iron-session' {
 		user?: {
 			id: string
 			telegram?: {
+				firstName?: string
 				username: string
+				photoUrl?: string
 				id: number
 			}
 		}
