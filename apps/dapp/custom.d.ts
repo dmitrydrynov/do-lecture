@@ -8,6 +8,10 @@ export declare module 'iron-session' {
 	interface IronSessionData {
 		user?: {
 			id: string
+			telegram?: {
+				username: string
+				id: number
+			}
 		}
 	}
 }

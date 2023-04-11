@@ -7,6 +7,7 @@ import { ConfigProvider } from 'antd'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Head from 'next/head'
+import { UserContext, useUserContext } from '@/contexts/user'
 
 dayjs.extend(relativeTime)
 
@@ -17,6 +18,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 	}
 	const tonContext = useTonContext({ onConnectError })
 	const settingsContext = useSettingsContext()
+	const userContext = useUserContext()
 
 	return (
 		<>
@@ -28,9 +30,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<ConfigProvider theme={defaultTheme}>
+			<UserContext.Provider value={userContext}>
 				<SettingsContext.Provider value={settingsContext}>
 					<TonContext.Provider value={tonContext}>{getLayout(<Component {...pageProps} />)}</TonContext.Provider>
 				</SettingsContext.Provider>
+				</UserContext.Provider>
 			</ConfigProvider>
 		</>
 	)

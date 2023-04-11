@@ -1,4 +1,5 @@
 import { createUser, findUserByHash, findUserByTelegramId } from './airtable'
+import TelegramService from './telegram'
 
 export default class Api {
 	static loginByHash = async (hash: string) => {
@@ -17,16 +18,16 @@ export default class Api {
 		}
 	}
 
-	static loginByTelegram = async (data: Record<string, any>) => {
+	static loginByTelegram = async (data: any) => {
 		try {
-			let user: any
+			const tgValidated = TelegramService.verifyAuthorization(data)
 
-      console.log(data)
+			if (!tgValidated) return false
 
-			user = await findUserByTelegramId(data.telegramId)
+			let user = await findUserByTelegramId(data.id)
 
 			if (!user) {
-				user = await createUser({ telegramId: data.id })
+				user = await createUser({ telegramId: data.id, telegramName: data.username })
 			}
 
 			return user

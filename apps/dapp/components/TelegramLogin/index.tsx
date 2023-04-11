@@ -3,10 +3,12 @@ import styles from './style.module.scss'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import crypto from 'crypto'
+import { useUserContext } from '@/contexts/user'
 
 export const TelegramLogin = () => {
 	const router = useRouter()
 	const [loginWindow, setLoginWindow] = useState<Window | null>()
+	const user = useUserContext()
 
 	useEffect(() => {
 		const { username, hash } = router.query
@@ -59,7 +61,7 @@ export const TelegramLogin = () => {
 
 	return (
 		<Button size="large" type="primary" onClick={handleTelegramLogin} className={styles.telegramButton} icon={<span className="icon-app icon-app-telegram"></span>}>
-			Connect Telegram {router.query.username}
+			Connect Telegram {user.telegram.id}
 		</Button>
 	)
 }

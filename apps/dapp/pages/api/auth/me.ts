@@ -7,28 +7,9 @@ export default withIronSessionApiRoute(handler, sessionOptions)
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
-		let user: any
+		if (!req.session.user) return res.send(null)
 
-		if (req.session.user) {
-			return res.send(req.session.user)
-		}
-
-		if (req.method !== 'POST' || !req.body) return res.status(403).end()
-
-		const hash = JSON.parse(req.body)
-
-		user = await findUserByHash({ hash })
-
-		if (!user) {
-			user = await createUser({ hash })
-		}
-
-		req.session.user = {
-			id: user.id,
-		}
-		await req.session.save()
-
-		res.send({ id: user.id, username: user.username, telegramName: user.telegramName })
+		return res.send(req.session.user)
 	} catch (error: any) {
 		res.status(502).json({ error: error.message || 'Something wrong' })
 	}

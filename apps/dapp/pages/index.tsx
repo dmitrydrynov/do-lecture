@@ -9,6 +9,7 @@ import { withIronSessionSsr } from 'iron-session/next'
 import { sessionOptions } from 'config/sessions'
 import TelegramService from '@/services/telegram'
 import Api from '@/services/api'
+import { withSessionSsr } from '@/helpers/withSession'
 
 const { Title, Text } = Typography
 
@@ -32,27 +33,27 @@ const Home = () => {
 
 Home.getLayout = (page: ReactElement) => <PublicLayout>{page}</PublicLayout>
 
-export const getServerSideProps = withIronSessionSsr(async function getServerSideProps({ req, query }) {
-	// const user = req.session.user;
+export const getServerSideProps = withSessionSsr(async function getServerSideProps({ req, query }) {
 	if (query?.hash) {
-		const tgValidated = TelegramService.verifyAuthorization(query)
+		// try login by telegram
+		const loggedUser = await Api.loginByTelegram(query)
 
-		if (tgValidated) {
-			const user = await Api.loginByTelegram(query)
+		if (loggedUser) {
+			req.session.user = { id: loggedUser.id, telegram: { username: loggedUser.telegramName, id: loggedUser.telegramId } }
+			await req.session.save()
 
 			return {
-				props: {
-					user,
+				redirect: {
+					destination: '/',
 				},
+				props: {},
 			}
 		}
 	}
 
 	return {
-		props: {
-			// user: req.session.user,
-		},
+		props: {},
 	}
-}, sessionOptions)
+})
 
 export default Home

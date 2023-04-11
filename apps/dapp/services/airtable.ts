@@ -143,9 +143,10 @@ export const getRunupPaidLectures = async () => {
 	}
 }
 
-export const createUser = async ({ hash }: any) => {
+export const createUser = async ({ hash, telegramId }: any) => {
 	const user = await AirtableService('User').create({
 		hash,
+		telegramId,
 		roles: ['member'],
 	})
 
