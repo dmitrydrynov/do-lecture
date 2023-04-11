@@ -11,7 +11,7 @@ class Bot {
   bot: Telegraf<IBotContext>;
   commands: Command[] = [];
 
-  constructor(private readonly configService: IConfigService) {
+  constructor(public readonly configService: IConfigService) {
     this.bot = new Telegraf<IBotContext>(
       this.configService.get("TELEGRAM_BOT_TOKEN")
     );
@@ -30,7 +30,7 @@ class Bot {
     );
 
     for (const command of this.commands) {
-      command.handle();
+      command.handle(this.configService);
     }
 
     this.bot.launch();

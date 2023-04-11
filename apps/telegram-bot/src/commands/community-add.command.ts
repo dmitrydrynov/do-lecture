@@ -2,6 +2,7 @@ import { Markup, Telegraf } from "telegraf";
 import { Command } from "./command.class";
 import { IBotContext } from "../context/context.interface";
 import { message } from "telegraf/filters";
+import { ConfigService } from "../config/config.service";
 
 export class CommunityAddCommand extends Command {
   name = "AddCommunity";
@@ -10,7 +11,7 @@ export class CommunityAddCommand extends Command {
     super(bot);
   }
 
-  handle(): void {
+  handle(config: ConfigService): void {
     this.bot.command("community_add", (ctx) => {
       ctx.reply(
         "To connect your community, please click on the button below.",
@@ -40,7 +41,7 @@ export class CommunityAddCommand extends Command {
         "Successful! You community connected. Now you can set a manager and share the first lecture after that.",
         Markup.inlineKeyboard([
           Markup.button.callback("Button 1", "data"),
-          Markup.button.login("Login", "https://delecture.vercel.app"),
+          Markup.button.login("Login", config.get("TELEGRAM_BOT_DOMAIN")),
         ])
       );
     });

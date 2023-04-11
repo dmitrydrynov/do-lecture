@@ -3,6 +3,7 @@ import { type Update } from "typegram/update";
 import { Command } from "./command.class";
 import { IBotContext } from "../context/context.interface";
 import { either, message } from "telegraf/filters";
+import { ConfigService } from "../config/config.service";
 
 export class StartCommand extends Command {
   name = "Start";
@@ -11,16 +12,14 @@ export class StartCommand extends Command {
     super(bot);
   }
 
-  handle(): void {
+  handle(config: ConfigService): void {
     this.bot.start((ctx) => {
       ctx.reply(
         "Welcome! Let's try to work together ;)",
         Markup.inlineKeyboard([
-          Markup.button.login(
-            "Login",
-            process.env.TELEGRAM_BOT_DOMAIN as string,
-            { request_write_access: true }
-          ),
+          Markup.button.login("Login", config.get("TELEGRAM_BOT_DOMAIN"), {
+            request_write_access: true,
+          }),
         ])
         // Markup.inlineKeyboard([
         //   Markup.button.callback("Like", "course_like"),
