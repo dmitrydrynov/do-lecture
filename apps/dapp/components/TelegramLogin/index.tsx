@@ -6,45 +6,41 @@ import crypto from 'crypto'
 import Image from 'next/image'
 import { useUserContext } from '@/contexts/user'
 import { DownOutlined } from '@ant-design/icons'
+import { TelegramWidget } from '@/helpers/telegram/widget'
+import { fetcher } from '@/helpers/fetcher'
 
 const { Text, Paragraph } = Typography
 
-export const TelegramLogin = ({ onChange = () => {} }: any) => {
-	const router = useRouter()
-	const [loginWindow, setLoginWindow] = useState<Window | null>()
-	let { user, refreshUser } = useUserContext()
+export const TelegramLogin = ({ onLogin = (user: any) => {}, onLogout = () => {} }: any) => {
+	const { user, refreshSession } = useUserContext()
+	const [isLoading, setIsLoading] = useState(false)
+	const [popup, setPopup] = useState<Window>()
 
-	const handleTelegramLogin = () => {
-		const url = new URL(
-			'https://oauth.telegram.org/auth?' +
-				new URLSearchParams({
-					bot_id: '5646232415',
-					origin: process.env.NEXT_PUBLIC_APP_URL as string,
-					request_access: 'write',
-					return_to: process.env.NEXT_PUBLIC_APP_URL as string,
-					embed: '0',
-				})
-		)
+	const handleLogin = async () => {
+		if (!isLoading) {
+			const widget = new TelegramWidget('5646232415', true)
+			widget.auth(callbackOnLogin, setIsLoading)
+			setPopup(widget.popup.window!)
+		} else if (popup) {
+			popup.focus()
+		}
+	}
 
-		if (loginWindow == null || loginWindow.closed) {
-			const top = Math.round(screen.height * 0.1)
-			const left = Math.round((screen.width - 560) / 2)
-			const newWindow = window.open(
-				url,
-				'telegramLoginWindow',
-				`toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=560,height=480,top=${top},left=${left}`
-			)
-			setLoginWindow(newWindow)
-		} else {
-			loginWindow.focus()
+	const callbackOnLogin = async (data: any) => {
+		try {
+			await fetcher(['/api/auth/login', data])
+			await refreshSession()
+			await onLogin()
+		} catch (e: any) {
+			console.error(e)
 		}
 	}
 
 	const handleLogout = async () => {
 		if (user.telegram.id) {
 			await fetch('/api/auth/logout')
-			user = undefined
-			onChange()
+			await refreshSession()
+			await onLogout()
 		}
 	}
 
@@ -63,10 +59,10 @@ export const TelegramLogin = ({ onChange = () => {} }: any) => {
 						],
 					}}
 				>
-					<Button type="primary" size="large" className={styles.telegramButton} >
+					<Button type="primary" size="large" className={styles.telegramButton}>
 						<Space align="center">
 							<Paragraph style={{ textAlign: 'left', lineHeight: 0, margin: 0 }}>
-								<Text style={{ lineHeight: 1 }}>{user.telegram.firstName}</Text>
+								<Text style={{ lineHeight: 1 }}>{user?.telegram?.firstName || user?.telegram?.id}</Text>
 								<br />
 								<Text type="secondary" style={{ fontSize: 11, fontWeight: 100 }}>
 									Telegram account
@@ -77,7 +73,7 @@ export const TelegramLogin = ({ onChange = () => {} }: any) => {
 					</Button>
 				</Dropdown>
 			) : (
-				<Button size="large" type="primary" onClick={handleTelegramLogin} className={styles.telegramButton} icon={<span className="icon-app icon-app-telegram"></span>}>
+				<Button size="large" type="primary" onClick={handleLogin} className={styles.telegramButton} icon={<span className="icon-app icon-app-telegram"></span>}>
 					Connect Telegram
 				</Button>
 			)}

@@ -6,7 +6,9 @@ export const fetcher = ([url, data]: any, changeData?: (data: any) => any) =>
 	}).then(async (res) => {
 		if (!res.ok && res.statusText) throw Error(res.statusText)
 
-		let data = await res.json()
+		const dataAsText = await res.text()
+
+		let data = !!dataAsText ? JSON.parse(dataAsText) : undefined
 
 		if (changeData) {
 			data = changeData(data)
@@ -30,4 +32,24 @@ export const getFetcher = ([url, data]: any, changeData?: (data: any) => any) =>
 
 		return data
 	})
+}
+
+export const fetcherWithCredentials = async ([url, data]: any, params?: Record<string, any>) => {
+	try {
+		const res = await fetch(url, {
+			method: 'post',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'X-Requested-With': 'XMLHttpRequest',
+			},
+			body: new URLSearchParams(data),
+		})
+
+		if (!res.ok && res.statusText) throw Error(res.statusText)
+
+		return await res.json()
+	} catch (e: any) {
+		throw e
+	}
 }

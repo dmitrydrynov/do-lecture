@@ -7,9 +7,9 @@ export default withIronSessionApiRoute(handler, sessionOptions)
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
-		if (!req.session.user) return res.send(null)
+		if (!req.session.user) return res.send({ user: null })
 
-		return res.send(req.session.user)
+		return res.json({ user: req.session.user })
 	} catch (error: any) {
 		res.status(502).json({ error: error.message || 'Something wrong' })
 	}

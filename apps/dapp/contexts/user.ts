@@ -17,11 +17,15 @@ export const UserContext = createContext<UserContextType>({})
 export const useUserContext = () => {
 	const router = useRouter()
 	const [user, setUser] = useState<any>()
-	const { data, mutate } = useSWR(['/api/auth/me'], fetcher, { revalidateOnFocus: false })
 
 	useEffect(() => {
-		setUser(data)
-	}, [data])
+		userFetcher()
+	}, [])
 
-	return { user }
+	const userFetcher = async () => {
+		const { user } = await fetcher(['/api/auth/me'])
+		setUser(user)
+	}
+
+	return { user, refreshSession: userFetcher }
 }

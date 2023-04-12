@@ -61,7 +61,7 @@ const MyProfilePage = () => {
 		try {
 			const res = await saveProfile(values)
 
-			if (res.error) throw Error(res.error)
+			if (res?.error) throw Error(res.error)
 
 			messageApi.success('Your profile updated')
 		} catch (error: any) {
