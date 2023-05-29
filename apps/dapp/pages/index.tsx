@@ -1,15 +1,11 @@
-import { ReactElement, useContext, useState } from 'react'
+import { ReactElement } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { LecturesList } from '@/components/LecturesList'
+import { ReadyLecturesList } from '@/components/ReadyLecturesList'
+import { withSessionSsr } from '@/helpers/withSession'
+import Api from '@/services/api'
 import styles from '@/styles/Home.module.css'
 import { Space, Typography } from 'antd'
-import Head from 'next/head'
-import { ReadyLecturesList } from '@/components/ReadyLecturesList'
-import { withIronSessionSsr } from 'iron-session/next'
-import { sessionOptions } from 'config/sessions'
-import TelegramService from '@/services/telegram'
-import Api from '@/services/api'
-import { withSessionSsr } from '@/helpers/withSession'
 
 const { Title, Text } = Typography
 

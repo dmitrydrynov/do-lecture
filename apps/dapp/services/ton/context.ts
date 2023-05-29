@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Dispatch, SetStateAction, createContext, useEffect, useState } from 'react'
+import { TonConnectProvider } from '@/services/ton/provider'
 import TonConnect, { CHAIN, TonConnectError, Wallet, WalletInfo } from '@tonconnect/sdk'
 import { Address } from 'ton'
 import { sha256 } from 'ton-crypto'
-import { TonConnectProvider } from '@/services/ton/provider'
 
 export type TonContextType = {
 	connector?: TonConnect

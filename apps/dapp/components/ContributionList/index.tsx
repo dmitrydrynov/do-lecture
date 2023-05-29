@@ -1,15 +1,14 @@
+import { useContext } from 'react'
 import { fetcher } from '@/helpers/fetcher'
+import { renderPrice, sliceAddress } from '@/helpers/utils'
+import { TonContext } from '@/services/ton/context'
 import { Grid, Table, Typography } from 'antd'
-import { useRouter } from 'next/router'
+import dayjs from 'dayjs'
+import Link from 'next/link'
 import useSWR from 'swr'
 import { fromNano } from 'ton'
 import styles from './style.module.css'
-import { renderPrice, sliceAddress } from '@/helpers/utils'
-import dayjs from 'dayjs'
 import { TonCoinSvg } from '../icons/TonCoinSvg'
-import Link from 'next/link'
-import { useContext } from 'react'
-import { TonContext } from '@/services/ton/context'
 
 const { Text } = Typography
 

@@ -1,11 +1,11 @@
 import { ReactNode } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
-import styles from './style.module.css'
+import { fetcher } from '@/helpers/fetcher'
 import { Avatar, Button, Col, Grid, List, Row, Typography } from 'antd'
 import Head from 'next/head'
-import useSWR from 'swr'
-import { fetcher } from '@/helpers/fetcher'
 import Link from 'next/link'
+import useSWR from 'swr'
+import styles from './style.module.css'
 
 const { Title, Text } = Typography
 

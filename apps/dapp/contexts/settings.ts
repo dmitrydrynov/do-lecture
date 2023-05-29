@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { createContext } from 'react'
-import useSWR from 'swr'
 import { fetcher } from '@/helpers/fetcher'
+import useSWR from 'swr'
 
 export type SettingsContextType = {
 	serviceWallet?: string

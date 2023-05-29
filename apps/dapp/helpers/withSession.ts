@@ -1,5 +1,5 @@
-import { withIronSessionApiRoute, withIronSessionSsr } from 'iron-session/next'
 import { sessionOptions } from 'config/sessions'
+import { withIronSessionApiRoute, withIronSessionSsr } from 'iron-session/next'
 import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from 'next'
 
 export function withSessionRoute(handler: NextApiHandler) {

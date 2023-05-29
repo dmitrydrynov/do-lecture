@@ -1,12 +1,12 @@
-import { ReactElement, useContext, useState } from 'react'
+import { ReactElement } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { LecturesList } from '@/components/LecturesList'
+import { ReadyLecturesList } from '@/components/ReadyLecturesList'
+import { fetcher } from '@/helpers/fetcher'
 import styles from '@/styles/Home.module.css'
 import { Space, Typography } from 'antd'
-import useSWR from 'swr'
-import { ReadyLecturesList } from '@/components/ReadyLecturesList'
 import { useRouter } from 'next/router'
-import { fetcher } from '@/helpers/fetcher'
+import useSWR from 'swr'
 
 const { Title, Text } = Typography
 

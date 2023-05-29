@@ -1,8 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { createContext, useEffect, useState } from 'react'
-import useSWR from 'swr'
 import { fetcher } from '@/helpers/fetcher'
-import { useRouter } from 'next/router'
 
 export type UserContextType = {
 	id?: string
@@ -14,8 +12,7 @@ export type UserContextType = {
 
 export const UserContext = createContext<UserContextType>({})
 
-export const useUserContext = () => {
-	const router = useRouter()
+export const useUserContext: any = () => {
 	const [user, setUser] = useState<any>()
 
 	useEffect(() => {

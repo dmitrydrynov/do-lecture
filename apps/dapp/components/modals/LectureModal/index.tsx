@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { SettingsContext } from '@/contexts/settings'
 import { fetcher } from '@/helpers/fetcher'
 import { TonContext } from '@/services/ton/context'

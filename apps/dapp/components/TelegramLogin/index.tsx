@@ -1,10 +1,10 @@
-import { Button, Dropdown, Space, Typography } from 'antd'
-import styles from './style.module.scss'
 import { useState } from 'react'
 import { useUserContext } from '@/contexts/user'
-import { DownOutlined } from '@ant-design/icons'
-import { TelegramWidget } from '@/helpers/telegram/widget'
 import { fetcher } from '@/helpers/fetcher'
+import { TelegramWidget } from '@/helpers/telegram/widget'
+import { DownOutlined } from '@ant-design/icons'
+import { Button, Dropdown, Space, Typography } from 'antd'
+import styles from './style.module.scss'
 
 const { Text, Paragraph } = Typography
 

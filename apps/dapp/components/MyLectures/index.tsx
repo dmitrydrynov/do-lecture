@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { useContext, useEffect, useState } from 'react'
 import { fetcher } from '@/helpers/fetcher'
+import { renderPrice } from '@/helpers/utils'
 import { TonContext } from '@/services/ton/context'
 import { sleep } from '@/services/ton/provider'
 import Icon from '@ant-design/icons'
@@ -9,13 +10,12 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { Lecture } from 'lecture-contract/wrappers/Lecture'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import useSWR from 'swr'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
-import { Address, toNano } from 'ton'
+import { Address } from 'ton'
 import styles from './style.module.css'
 import { TonScanSvg } from '../icons/TonScanSvg'
-import { renderPrice } from '@/helpers/utils'
-import Link from 'next/link'
 
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })
 

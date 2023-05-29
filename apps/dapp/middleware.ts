@@ -1,8 +1,7 @@
+import { sessionOptions } from 'config/sessions'
+import { getIronSession } from 'iron-session/edge'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getIronSession } from 'iron-session/edge'
-import { sessionOptions } from 'config/sessions'
-import Api from './services/api'
 
 export const middleware = async (req: NextRequest) => {
 	const url = req.nextUrl.clone();

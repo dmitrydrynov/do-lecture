@@ -1,12 +1,11 @@
 import { ReactNode, useEffect, useState } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
-import styles from './style.module.scss'
-import { Alert, Button, Col, Form, Input, Row, Space, Spin, Typography, message } from 'antd'
+import { fetcher } from '@/helpers/fetcher'
+import { Button, Col, Form, Input, Row, Spin, Typography, message } from 'antd'
 import Head from 'next/head'
 import useSWR from 'swr'
-import { fetcher } from '@/helpers/fetcher'
 import useSWRMutation, { SWRMutationResponse } from 'swr/mutation'
-import { TLoginButton, TLoginButtonSize } from 'react-telegram-auth'
+import styles from './style.module.scss'
 
 type TelegramUser = Readonly<{
 	auth_date: number

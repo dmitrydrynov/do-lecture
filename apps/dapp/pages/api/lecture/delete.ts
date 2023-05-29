@@ -1,7 +1,7 @@
 import { deleteDraftLecture } from '@/services/airtable'
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { withIronSessionApiRoute } from 'iron-session/next'
 import { sessionOptions } from 'config/sessions'
+import { withIronSessionApiRoute } from 'iron-session/next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default withIronSessionApiRoute(handler, sessionOptions)
 

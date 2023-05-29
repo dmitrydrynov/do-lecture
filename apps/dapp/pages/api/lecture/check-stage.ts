@@ -1,4 +1,4 @@
-import AirtableService, { cancelLecture, updateLectureStage } from '@/services/airtable'
+import AirtableService, { updateLectureStage } from '@/services/airtable'
 import { getLectureStage } from '@/services/ton/provider'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton-core'

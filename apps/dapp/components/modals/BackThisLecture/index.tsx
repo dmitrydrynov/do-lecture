@@ -1,7 +1,7 @@
+import { useContext, useState } from 'react'
 import { TonContext } from '@/services/ton/context'
 import { Form, InputNumber, Modal } from 'antd'
 import { wrapper } from 'lecture-contract'
-import { useContext, useState } from 'react'
 import { SelectWalletModal } from '../SelectWalletModal'
 
 export const BackThisLecture = ({ open, wait, onFinish, onCancel }: any) => {

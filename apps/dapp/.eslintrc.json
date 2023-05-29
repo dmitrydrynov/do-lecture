@@ -3,7 +3,48 @@
 	"extends": [
 		"custom"
 	],
+	"plugins": [
+		"unused-imports"
+	],
 	"rules": {
-		"react-hooks/exhaustive-deps": "off"
+		"react-hooks/exhaustive-deps": "off",
+		"import/order": [
+			"error",
+			{
+				"alphabetize": {
+					"order": "asc",
+					"caseInsensitive": true
+				},
+				"groups": [
+					"builtin",
+					"internal",
+					"external",
+					"sibling",
+					"index"
+				],
+				"newlines-between": "never",
+				"pathGroups": [
+					{
+						"pattern": "react",
+						"group": "builtin",
+						"position": "before"
+					}
+				],
+				"pathGroupsExcludedImportTypes": [
+					"react"
+				]
+			}
+		],
+		"no-unused-vars": "off",
+		"unused-imports/no-unused-imports": "error",
+		"unused-imports/no-unused-imports-ts": [
+			"warn",
+			{
+				"vars": "all",
+				"varsIgnorePattern": "^_",
+				"args": "after-used",
+				"argsIgnorePattern": "^_"
+			}
+		]
 	}
 }

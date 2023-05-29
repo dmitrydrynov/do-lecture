@@ -1,6 +1,5 @@
-import AirtableService, { cancelLecture, updateLectureStage } from '@/services/airtable'
+import AirtableService, { updateLectureStage } from '@/services/airtable'
 import { getLectureStage, initLectureContract, tonApi } from '@/services/ton/provider'
-import dayjs from 'dayjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'ton'
 

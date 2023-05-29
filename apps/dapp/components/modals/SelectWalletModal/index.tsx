@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
+import { useContext, useState } from 'react'
+import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
 import { TonContext } from '@/services/ton/context'
 import { Button, Modal, Row, Typography } from 'antd'
-import { useContext, useState } from 'react'
 import { QRCode } from 'react-qrcode-logo'
-import { addReturnStrategy, isMobile, openLink } from '@/helpers/utils'
 import styles from './style.module.css'
 
 const { Text, Paragraph } = Typography

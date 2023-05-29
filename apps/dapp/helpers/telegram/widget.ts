@@ -1,5 +1,5 @@
 import React from 'react'
-import { fetcher, fetcherWithCredentials, getFetcher } from '../fetcher'
+import { fetcherWithCredentials } from '../fetcher'
 
 interface Popup {
 	window: Window | null

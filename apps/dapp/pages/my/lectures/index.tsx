@@ -1,15 +1,15 @@
 import { ReactNode, useContext, useState } from 'react'
 import PublicLayout from '@/components/layouts/PublicLayout'
 import { MyLectures } from '@/components/MyLectures'
+import { fetcher } from '@/helpers/fetcher'
 import { TonContext } from '@/services/ton/context'
 import styles from '@/styles/Home.module.css'
 import { Button, Col, Row, Space, Typography } from 'antd'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
+import Link from 'next/link'
 import { HiPlusSm } from 'react-icons/hi'
 import useSWR from 'swr'
-import { fetcher } from '@/helpers/fetcher'
-import Link from 'next/link'
 
 const { Title, Text } = Typography
 const LectureModal = dynamic(() => import('@/components/modals/LectureModal').then((r) => r.LectureModal), { ssr: false })

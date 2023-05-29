@@ -1,4 +1,3 @@
-import { createUser, findUserByHash } from '@/services/airtable'
 import { sessionOptions } from 'config/sessions'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'

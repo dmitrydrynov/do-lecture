@@ -1,12 +1,11 @@
+import { useMemo } from 'react'
 import { fetcher } from '@/helpers/fetcher'
-import { Grid, Progress, Table, TableColumnType, Typography } from 'antd'
+import { Grid, Progress, Table, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
 import { HiOutlineChevronRight } from 'react-icons/hi'
 import useSWR from 'swr'
-import { fromNano } from 'ton'
 import styles from './style.module.css'
 
 const { Text, Title } = Typography

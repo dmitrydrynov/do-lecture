@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import { TonContext } from '@/services/ton/context'
-import { Button, Row, Layout, Col, Space, Tag, Tooltip, Popover, Drawer, Grid, Menu } from 'antd'
+import { Button, Row, Layout, Col, Space, Tag, Drawer, Grid, Menu } from 'antd'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { HiMenu } from 'react-icons/hi'
 import styles from './style.module.css'
 import { AuthButton } from '../AuthButton'
-import { HiMenu } from 'react-icons/hi'
-import { useRouter } from 'next/router'
 import { TelegramLogin } from '../TelegramLogin'
 
 const { Header } = Layout

@@ -1,5 +1,4 @@
 import { checkUserProfile } from '@/services/airtable'
-import { initLectureContract } from '@/services/ton/provider'
 import { sessionOptions } from 'config/sessions'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import type { NextApiRequest, NextApiResponse } from 'next'

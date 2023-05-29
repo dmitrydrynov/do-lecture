@@ -7,8 +7,6 @@ import { DownOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Modal, Row, Space, Typography } from 'antd'
 import { QRCode } from 'react-qrcode-logo'
 import styles from './style.module.scss'
-import { TLoginButton, TLoginButtonSize } from 'react-telegram-auth'
-import { TelegramLogin } from '../TelegramLogin'
 
 type TelegramUser = Readonly<{
 	auth_date: number
