@@ -1,9 +1,6 @@
 import { Button, Dropdown, Space, Typography } from 'antd'
 import styles from './style.module.scss'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import crypto from 'crypto'
-import Image from 'next/image'
+import { useState } from 'react'
 import { useUserContext } from '@/contexts/user'
 import { DownOutlined } from '@ant-design/icons'
 import { TelegramWidget } from '@/helpers/telegram/widget'
@@ -37,7 +34,7 @@ export const TelegramLogin = ({ onLogin = (user: any) => {}, onLogout = () => {}
 	}
 
 	const handleLogout = async () => {
-		if (user.telegram.id) {
+		if (user?.telegram?.id) {
 			await fetch('/api/auth/logout')
 			await refreshSession()
 			await onLogout()
