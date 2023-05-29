@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import * as dotenv from 'dotenv'
 import { exit } from 'process'
+import * as dotenv from 'dotenv'
 
 dotenv.config()
 

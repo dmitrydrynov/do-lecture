@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "predev": "node ./services/ton/manifest.mjs",
-    "prestart": "node ./services/ton/manifest.mjs"
+    "prestart": "node ./services/ton/manifest.mjs",
+    "postbuild": "node ./services/ton/manifest.mjs"
   },
   "dependencies": {
     "@ant-design/colors": "^7.0.0",
